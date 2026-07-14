@@ -1235,7 +1235,7 @@ body {
     <button class="ready-close" onclick="toggleReadyPanel()" aria-label="Close">✕</button>
   </div>
   <div id="ready-body"></div>
-  <div class="readiness-note">Boxes with a <strong>dashed amber border</strong> in the documents are physician attestations — click each one that applies before printing. Unattested boxes print as standard empty checkboxes. This checklist never prints.</div>
+  <div class="readiness-note">Boxes with a <strong>dashed amber border</strong> in the documents are physician attestations — click the ones that apply before printing. Leaving a box unchecked is correct when it does not apply; it prints as a standard empty checkbox. This checklist never prints.</div>
 </div>
 
 <!-- ============================================================
@@ -1909,10 +1909,19 @@ function updateReadiness() {
   add(!!latSel, latSel ? 'Laterality selected: ' + latSel : 'Laterality not selected — laterality-specific ICD-10 codes omitted');
 
   if (docsUp) {
-    const customDone = document.querySelectorAll('#smn-custom .cbox.checked').length;
-    const pending = document.querySelectorAll('#doc-wrap .cbox.attest:not(.checked)').length;
+    const cnt = sel => document.querySelectorAll(sel + ' .cbox.checked').length;
+    const critDone   = cnt('#smn-criteria');
+    const goalsDone  = cnt('#smn-goals');
+    const customDone = cnt('#smn-custom');
+    const objDone    = cnt('#swo-objectives');
+    const ehrObjDone = cnt('#ehr-objectives');
+    // The SMN certifies the patient meets ALL four criteria — every box must be checked.
+    add(critDone === 4, `SMN qualification criteria: ${critDone} of 4 attested` + (critDone < 4 ? ' — the certification requires all four' : ''));
+    // "Indicate all that apply" lists: at least one selection each; unchecked boxes that don't apply are fine.
+    add(goalsDone > 0, goalsDone > 0 ? `Therapy goals selected: ${goalsDone}` : 'No therapy goal selected on the SMN — select at least one');
     add(customDone > 0, `Custom-AFO necessity criteria attested: ${customDone} of 5` + (customDone === 0 ? ' — a custom-molded AFO claim needs at least one' : ''));
-    add(pending === 0, pending === 0 ? 'No physician attestations pending' : `${pending} physician attestation box${pending === 1 ? '' : 'es'} pending in the documents`);
+    add(objDone > 0, objDone > 0 ? `SWO therapeutic objectives selected: ${objDone}` : 'No therapeutic objective selected on the SWO — select at least one');
+    add(ehrObjDone > 0, ehrObjDone > 0 ? `EHR note objectives selected: ${ehrObjDone}` : 'No therapeutic objective selected on the EHR note — select at least one');
   } else {
     html += `<div class="ready-row"><span class="ri" style="color:var(--grey)">…</span><span style="color:var(--grey)">Generate the compliance documents to review physician attestations</span></div>`;
   }
