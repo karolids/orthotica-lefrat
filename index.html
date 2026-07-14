@@ -1,0 +1,1786 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LE-FRAT™ Fall Risk Assessment | Orthotica Labs</title>
+<style>
+/* ============================================================
+   RESET & BASE
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+  background: #F5F5F5;
+  color: #1A1A1A;
+  font-size: 14px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ============================================================
+   BRAND TOKENS
+   ============================================================ */
+:root {
+  --pink:        #D81B6A;
+  --pink-dark:   #A01050;
+  --pink-light:  #FCE4EC;
+  --pink-mid:    #F48FB1;
+  --black:       #1A1A1A;
+  --grey-dark:   #424242;
+  --grey:        #757575;
+  --grey-light:  #E0E0E0;
+  --grey-bg:     #F5F5F5;
+  --white:       #FFFFFF;
+  --success:     #2E7D32;
+  --success-bg:  #E8F5E9;
+  --warn:        #E65100;
+  --warn-bg:     #FFF3E0;
+  --danger:      #B71C1C;
+  --danger-bg:   #FFEBEE;
+  --card-shadow: 0 1px 4px rgba(0,0,0,0.08), 0 2px 12px rgba(0,0,0,0.05);
+}
+
+/* ============================================================
+   STICKY HEADER
+   ============================================================ */
+.app-header {
+  position: sticky; top: 0; z-index: 300;
+  background: var(--black);
+  height: 58px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 20px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.4);
+}
+.brand {
+  display: flex; align-items: center; gap: 11px;
+}
+.brand-logo {
+  font-size: 22px; line-height: 1;
+}
+.brand-wordmark {
+  display: flex; flex-direction: column; gap: 0;
+}
+.brand-orth {
+  font-size: 15px; font-weight: 900; letter-spacing: 2px;
+  color: white; text-transform: uppercase; line-height: 1;
+}
+.brand-labs {
+  font-size: 11px; font-weight: 400; font-style: italic;
+  color: var(--pink); letter-spacing: 1px; line-height: 1.2;
+}
+.header-tool-name {
+  font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.55);
+  letter-spacing: 0.5px; margin-top: 1px;
+}
+.header-right {
+  display: flex; align-items: center; gap: 10px;
+}
+.score-badge {
+  display: flex; align-items: baseline; gap: 2px;
+  background: rgba(216,27,106,0.15);
+  border: 1.5px solid rgba(216,27,106,0.4);
+  border-radius: 50px;
+  padding: 4px 14px;
+}
+.score-badge-num {
+  font-size: 22px; font-weight: 900; color: var(--pink); line-height: 1;
+}
+.score-badge-den {
+  font-size: 12px; color: rgba(255,255,255,0.5); font-weight: 600;
+}
+.risk-tag {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.5px;
+  padding: 4px 12px; border-radius: 50px; text-transform: uppercase;
+  background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.6);
+  border: 1px solid rgba(255,255,255,0.15);
+  transition: all 0.3s;
+}
+.risk-tag.low  { background: rgba(46,125,50,0.6);  color: #C8FFD4; border-color: rgba(46,125,50,0.4); }
+.risk-tag.mod  { background: rgba(230,81,0,0.6);   color: #FFE8CC; border-color: rgba(230,81,0,0.4); }
+.risk-tag.high { background: rgba(183,28,28,0.6);  color: #FFD0D0; border-color: rgba(183,28,28,0.4); }
+
+/* ============================================================
+   LAYOUT
+   ============================================================ */
+.container { max-width: 860px; margin: 0 auto; padding: 20px 14px 80px; }
+
+/* Step chips */
+.steps { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
+.step-chip {
+  display: flex; align-items: center; gap: 5px;
+  padding: 5px 12px; border-radius: 50px;
+  font-size: 12px; font-weight: 700;
+  border: 1.5px solid var(--grey-light);
+  color: var(--grey); background: var(--white);
+  transition: all 0.2s;
+}
+.step-chip.active { border-color: var(--pink); color: var(--pink); background: var(--pink-light); }
+.step-chip.done   { border-color: var(--success); color: var(--success); background: var(--success-bg); }
+.step-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+
+/* Cards */
+.card {
+  background: var(--white); border-radius: 12px;
+  box-shadow: var(--card-shadow); margin-bottom: 16px;
+  overflow: hidden; border: 1px solid rgba(0,0,0,0.06);
+}
+.card-head {
+  padding: 13px 18px; border-bottom: 1.5px solid var(--grey-light);
+  display: flex; align-items: flex-start; gap: 11px;
+  background: #FAFAFA;
+}
+.card-head.pink {
+  background: var(--pink); border-bottom-color: transparent;
+}
+.card-head.dark {
+  background: var(--black); border-bottom-color: transparent;
+}
+.card-icon {
+  width: 28px; height: 28px; border-radius: 7px;
+  background: var(--pink); color: white;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 900; flex-shrink: 0; margin-top: 1px;
+}
+.card-head.pink .card-icon,
+.card-head.dark .card-icon {
+  background: rgba(255,255,255,0.18);
+}
+.card-head h2 { font-size: 14px; font-weight: 800; color: var(--black); line-height: 1.3; }
+.card-head.pink h2, .card-head.dark h2 { color: white; }
+.card-head p { font-size: 11px; color: var(--grey); margin-top: 2px; }
+.card-head.pink p, .card-head.dark p { color: rgba(255,255,255,0.72); }
+.card-body { padding: 18px; }
+
+/* ============================================================
+   FORM ELEMENTS
+   ============================================================ */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 560px) { .form-grid { grid-template-columns: 1fr; } }
+.fg { display: flex; flex-direction: column; gap: 4px; }
+.fl { font-size: 11px; font-weight: 700; color: var(--grey); text-transform: uppercase; letter-spacing: 0.5px; }
+.fc {
+  border: 1.5px solid var(--grey-light); border-radius: 6px;
+  padding: 8px 10px; font-size: 13px; color: var(--black);
+  background: #FAFAFA; width: 100%; font-family: inherit;
+  transition: border-color 0.18s, box-shadow 0.18s;
+}
+.fc:focus { outline: none; border-color: var(--pink); box-shadow: 0 0 0 3px rgba(216,27,106,0.12); background: white; }
+
+/* ============================================================
+   BANNERS
+   ============================================================ */
+.banner {
+  display: flex; align-items: flex-start; gap: 9px;
+  padding: 10px 13px; border-radius: 6px; font-size: 12px;
+  line-height: 1.5; margin-bottom: 14px;
+}
+.banner-icon { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+.banner-info { background: var(--pink-light); border: 1px solid var(--pink-mid); color: var(--pink-dark); }
+.banner-warn { background: var(--warn-bg); border: 1px solid #FFCC80; color: var(--warn); }
+
+/* ============================================================
+   ASSESSMENT ITEMS
+   ============================================================ */
+.item {
+  border: 1.5px solid var(--grey-light); border-radius: 10px;
+  padding: 13px 14px; margin-bottom: 10px;
+  background: #FAFAFA; transition: all 0.2s; position: relative;
+}
+.item.scored  { border-color: var(--danger);  background: var(--danger-bg); }
+.item.cleared { border-color: var(--success); background: var(--success-bg); }
+
+.item-top { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; }
+.item-num {
+  width: 26px; height: 26px; border-radius: 50%;
+  background: var(--pink); color: white;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 900; flex-shrink: 0; margin-top: 1px;
+  transition: background 0.2s;
+}
+.item.scored  .item-num { background: var(--danger); }
+.item.cleared .item-num { background: var(--success); }
+.item-domain {
+  font-size: 10px; font-weight: 800; letter-spacing: 1px;
+  text-transform: uppercase; color: var(--pink); margin-bottom: 2px;
+}
+.item.scored  .item-domain { color: var(--danger); }
+.item.cleared .item-domain { color: var(--success); }
+.item-q { font-size: 13px; font-weight: 700; color: var(--black); line-height: 1.35; }
+.item-hint { font-size: 11px; color: var(--grey); margin-top: 3px; line-height: 1.4; }
+
+.resp-row { display: flex; gap: 8px; margin-left: 36px; }
+.resp-btn {
+  flex: 1; padding: 8px 10px; border: 1.5px solid var(--grey-light);
+  border-radius: 6px; background: white; cursor: pointer;
+  font-size: 12px; font-weight: 700; color: var(--grey);
+  font-family: inherit; transition: all 0.15s; text-align: center;
+}
+.resp-btn:hover { border-color: var(--pink); color: var(--pink); background: var(--pink-light); }
+.resp-btn.yes { background: var(--danger);  border-color: var(--danger);  color: white; }
+.resp-btn.no  { background: var(--success); border-color: var(--success); color: white; }
+
+.item-badge {
+  position: absolute; top: 10px; right: 10px;
+  width: 22px; height: 22px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 900; opacity: 0; transition: opacity 0.2s;
+}
+.item.scored  .item-badge { background: var(--danger);  color: white; opacity: 1; }
+.item.cleared .item-badge { background: var(--success); color: white; opacity: 1; }
+
+/* Expanded detail (shows after scoring) */
+.item-detail {
+  display: none; margin: 10px 0 0 36px;
+  border-top: 1px solid var(--grey-light); padding-top: 10px;
+}
+.item.scored .item-detail.show-when-positive,
+.item.cleared .item-detail.show-always { display: block; }
+.item.scored .item-detail.show-always,
+.item.cleared .item-detail.show-always { display: block; }
+
+/* TUG Timer */
+.tug-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+.tug-time {
+  font-size: 34px; font-weight: 900; color: var(--pink);
+  font-variant-numeric: tabular-nums; min-width: 95px; letter-spacing: -1px;
+}
+.tug-running .tug-time { color: var(--danger); }
+.tbtn {
+  padding: 7px 14px; border-radius: 6px; border: none;
+  cursor: pointer; font-size: 12px; font-weight: 800;
+  font-family: inherit; transition: all 0.15s;
+}
+.tbtn-start { background: var(--pink); color: white; }
+.tbtn-start:hover { background: var(--pink-dark); }
+.tbtn-stop  { background: var(--danger); color: white; }
+.tbtn-stop:hover  { background: #8A0000; }
+.tbtn-reset { background: var(--grey-light); color: var(--black); }
+.tbtn-reset:hover { background: #C8C8C8; }
+.tug-verdict {
+  display: none; padding: 6px 11px; border-radius: 6px;
+  font-size: 12px; font-weight: 700; margin-top: 6px;
+}
+.tug-verdict.risk   { background: var(--danger-bg); color: var(--danger); border: 1px solid #EF9A9A; }
+.tug-verdict.ok     { background: var(--success-bg); color: var(--success); border: 1px solid #A5D6A7; }
+
+/* Gait checkboxes */
+.gait-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 5px 14px;
+  margin-top: 6px;
+}
+@media (max-width: 500px) { .gait-grid { grid-template-columns: 1fr; } }
+.gait-option { display: flex; align-items: center; gap: 7px; cursor: pointer; }
+.gait-option input[type="checkbox"] { accent-color: var(--pink); width: 14px; height: 14px; cursor: pointer; }
+.gait-option span { font-size: 12px; color: var(--black); }
+
+/* MMT Table */
+.mmt-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 6px; }
+.mmt-table th {
+  text-align: left; padding: 6px 8px; font-size: 10px;
+  font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+  color: var(--grey); background: #F0F0F0; border-bottom: 1px solid var(--grey-light);
+}
+.mmt-table td { padding: 5px 8px; border-bottom: 1px solid #F5F5F5; }
+.mmt-table tr:last-child td { border-bottom: none; }
+.mmt-radio-group { display: flex; gap: 4px; justify-content: center; flex-wrap: nowrap; }
+.mmt-radio-opt { cursor: pointer; }
+.mmt-radio-opt input[type="radio"] { display: none; }
+.mmt-radio-opt span {
+  display: flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; border-radius: 50%;
+  border: 1.5px solid var(--grey-light); font-size: 12px; font-weight: 700;
+  color: var(--grey); background: white; transition: all 0.15s; cursor: pointer;
+}
+.mmt-radio-opt input[type="radio"][value="5"]:checked + span {
+  background: var(--pink); border-color: var(--pink); color: white;
+}
+.mmt-radio-opt input[type="radio"][value="1"]:checked + span,
+.mmt-radio-opt input[type="radio"][value="2"]:checked + span,
+.mmt-radio-opt input[type="radio"][value="3"]:checked + span,
+.mmt-radio-opt input[type="radio"][value="4"]:checked + span {
+  background: var(--danger); border-color: var(--danger); color: white;
+}
+.mmt-muscle { font-size: 12px; color: var(--black); }
+.mmt-muscle small { display: block; font-size: 10px; color: var(--grey); }
+
+/* Additional findings */
+.findings-check { display: flex; align-items: flex-start; gap: 7px; cursor: pointer; margin-bottom: 7px; }
+.findings-check input[type="checkbox"] { accent-color: var(--pink); width: 14px; height: 14px; cursor: pointer; margin-top: 2px; flex-shrink: 0; }
+.findings-check span { font-size: 12px; color: var(--black); line-height: 1.45; }
+
+/* Deformity checkboxes */
+.deform-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 14px; margin-top: 6px; }
+@media (max-width: 500px) { .deform-grid { grid-template-columns: 1fr; } }
+
+/* Live score bar */
+.score-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--pink-light); border-radius: 10px; padding: 14px 16px;
+  margin-top: 10px; gap: 14px;
+}
+.score-track-wrap { flex: 1; }
+.score-track-lbl { font-size: 10px; font-weight: 800; color: var(--grey); text-transform: uppercase; letter-spacing: 0.5px; }
+.score-track-sub { font-size: 11px; color: var(--grey); margin-top: 2px; }
+.progress-wrap { height: 5px; background: var(--grey-light); border-radius: 3px; margin-top: 8px; overflow: hidden; }
+.progress-fill { height: 100%; border-radius: 3px; background: var(--pink); transition: width 0.3s, background 0.3s; }
+.score-big { text-align: center; }
+.score-big-num { font-size: 54px; font-weight: 900; color: var(--pink); line-height: 1; transition: color 0.3s; }
+.score-big-den { font-size: 13px; color: var(--grey); font-weight: 600; }
+
+/* ============================================================
+   RESULTS SECTION
+   ============================================================ */
+.risk-meter {
+  display: flex; border-radius: 9px; overflow: hidden;
+  height: 48px; margin-bottom: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+}
+.meter-seg {
+  flex: 1; display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 800; color: white; letter-spacing: 0.3px;
+  text-transform: uppercase; text-align: center; line-height: 1.2;
+  padding: 0 5px; opacity: 0.35; cursor: default; transition: all 0.3s;
+}
+.meter-seg.active { opacity: 1; transform: scaleY(1.07); }
+.seg-low  { background: var(--success); }
+.seg-mod  { background: var(--warn); }
+.seg-high { background: var(--danger); }
+
+.results-row { display: flex; gap: 14px; align-items: stretch; margin-bottom: 14px; flex-wrap: wrap; }
+.score-box {
+  background: var(--pink-light); border-radius: 10px;
+  padding: 16px 20px; text-align: center; flex-shrink: 0; min-width: 110px;
+}
+.score-box-lbl { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--grey); }
+.score-box-num { font-size: 60px; font-weight: 900; color: var(--pink); line-height: 1; transition: color 0.3s; }
+.score-box-den { font-size: 14px; color: var(--grey); font-weight: 600; }
+
+.risk-detail {
+  flex: 1; min-width: 200px; border-radius: 10px; padding: 14px 16px;
+}
+.risk-detail.low  { background: var(--success-bg); border: 2px solid #A5D6A7; }
+.risk-detail.mod  { background: var(--warn-bg);    border: 2px solid #FFCC80; }
+.risk-detail.high { background: var(--danger-bg);  border: 2px solid #EF9A9A; }
+.risk-detail-label { font-size: 18px; font-weight: 900; margin-bottom: 3px; }
+.risk-detail.low  .risk-detail-label { color: var(--success); }
+.risk-detail.mod  .risk-detail-label { color: var(--warn); }
+.risk-detail.high .risk-detail-label { color: var(--danger); }
+.risk-detail-pct { font-size: 12px; font-weight: 700; color: var(--black); margin-bottom: 8px; }
+.risk-detail-actions { font-size: 12px; color: var(--black); line-height: 1.75; }
+
+/* MBB box */
+.mbb-box { border-radius: 10px; padding: 14px 18px; margin-bottom: 14px; display: none; }
+.mbb-box.show { display: flex; align-items: flex-start; gap: 13px; }
+.mbb-box.show-block { display: block; }
+.mbb-indicated { background: linear-gradient(135deg, #1A1A1A, #3D0028); box-shadow: 0 2px 12px rgba(0,0,0,0.25); }
+.mbb-consider  { background: linear-gradient(135deg, #5D2600, #A04000); box-shadow: 0 2px 12px rgba(0,0,0,0.2); }
+.mbb-not       { background: #EEEEEE; border: 1.5px solid var(--grey-light); }
+.mbb-ikon { font-size: 28px; flex-shrink: 0; line-height: 1; }
+.mbb-title { font-size: 14px; font-weight: 900; color: white; margin-bottom: 3px; }
+.mbb-desc  { font-size: 12px; color: rgba(255,255,255,0.85); line-height: 1.5; }
+.mbb-codes { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; align-items: center; }
+.hchip {
+  font-family: 'SF Mono', 'Consolas', monospace; font-weight: 700; font-size: 12px;
+  background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 4px; padding: 2px 8px; color: white; letter-spacing: 0.5px;
+}
+.hchip-note { font-size: 11px; color: rgba(255,255,255,0.65); }
+.mbb-not-text { font-size: 13px; font-weight: 600; color: var(--grey); }
+
+/* Findings list */
+.findings-ul { list-style: none; }
+.findings-ul li {
+  display: flex; align-items: flex-start; gap: 7px;
+  padding: 5px 9px; border-radius: 5px; margin-bottom: 4px; font-size: 12px;
+}
+.findings-ul li.pos { background: var(--danger-bg);  color: var(--danger); }
+.findings-ul li.neg { background: var(--success-bg); color: var(--success); }
+.fdot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex-shrink: 0; margin-top: 3px; }
+
+.pending-msg { text-align: center; padding: 36px 20px; color: var(--grey); }
+.pending-num { font-size: 48px; font-weight: 900; color: var(--grey-light); }
+
+/* ============================================================
+   COMPLIANCE SECTION
+   ============================================================ */
+.compliance-actions { display: flex; gap: 9px; flex-wrap: wrap; margin-bottom: 14px; }
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 9px 18px; border-radius: 7px; border: none;
+  cursor: pointer; font-size: 13px; font-weight: 700;
+  font-family: inherit; transition: all 0.15s;
+}
+.btn-pink    { background: var(--pink); color: white; }
+.btn-pink:hover    { background: var(--pink-dark); transform: translateY(-1px); }
+.btn-outline { background: white; color: var(--pink); border: 2px solid var(--pink); }
+.btn-outline:hover { background: var(--pink-light); }
+.btn-grey    { background: var(--grey-light); color: var(--black); }
+.btn-grey:hover    { background: #C8C8C8; }
+
+/* Compliance doc wrapper */
+.doc-wrap { display: none; margin-top: 4px; }
+
+/* ============================================================
+   COMPLIANCE DOCUMENT STYLES (print-faithful)
+   ============================================================ */
+.comp-doc {
+  border: 1.5px solid var(--grey-light); border-radius: 10px;
+  padding: 28px; background: white; margin-bottom: 20px;
+}
+
+/* doc header row */
+.doc-brand-row {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  padding-bottom: 14px; border-bottom: 2px solid var(--pink);
+  margin-bottom: 18px;
+}
+.doc-brand-logo { font-size: 11px; font-weight: 900; letter-spacing: 2px; color: var(--black); }
+.doc-brand-sub  { font-size: 10px; font-style: italic; color: var(--pink); letter-spacing: 1px; }
+.doc-title-block { text-align: right; }
+.doc-title-main { font-size: 16px; font-weight: 900; color: var(--black); }
+.doc-title-sub  { font-size: 12px; font-weight: 700; color: var(--pink); }
+
+/* Pink section headers (match the compliance packet) */
+.doc-sec {
+  font-size: 13px; font-weight: 800; color: var(--pink);
+  margin: 16px 0 10px; padding-bottom: 4px;
+  border-bottom: 1.5px solid var(--pink-mid);
+}
+
+/* two-col grid for patient fields */
+.doc-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 20px; margin-bottom: 10px; }
+.doc-field-lbl { font-size: 10px; font-weight: 700; color: var(--grey); text-transform: uppercase; letter-spacing: 0.5px; }
+.doc-field-val {
+  font-size: 13px; font-weight: 600; color: var(--black);
+  border-bottom: 1px solid var(--grey-light); padding-bottom: 3px;
+  margin-top: 2px; min-height: 20px;
+}
+
+/* ICD table in doc */
+.icd-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 5px; }
+.icd-table th {
+  text-align: left; font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.5px; color: var(--grey);
+  padding: 5px 8px; background: #F5F5F5; border-bottom: 1px solid var(--grey-light);
+}
+.icd-table td { padding: 6px 8px; border-bottom: 1px solid #F5F5F5; }
+.icd-code { font-family: monospace; font-weight: 700; color: var(--pink); background: var(--pink-light); padding: 2px 6px; border-radius: 3px; font-size: 12px; }
+
+/* HCPCS product section */
+.product-block { border: 1px solid var(--grey-light); border-radius: 6px; padding: 12px 14px; margin-bottom: 8px; }
+.product-name { font-size: 13px; font-weight: 800; color: var(--pink); margin-bottom: 7px; }
+.product-code-row { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 4px; font-size: 12px; color: var(--black); }
+.product-code-label { font-family: monospace; font-weight: 700; color: var(--pink); min-width: 46px; flex-shrink: 0; }
+
+/* Checkbox rows for the compliance forms */
+.cbox-row { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 6px; font-size: 12px; color: var(--black); line-height: 1.45; }
+.cbox {
+  width: 13px; height: 13px; border: 1.5px solid var(--grey); border-radius: 2px;
+  flex-shrink: 0; margin-top: 1px; display: inline-flex; align-items: center; justify-content: center;
+  background: white; font-size: 9px; font-weight: 900;
+}
+.cbox.checked { background: var(--pink); border-color: var(--pink); color: white; }
+
+/* Score boxes in doc */
+.doc-score-boxes { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0; }
+.doc-score-box { border-radius: 7px; padding: 11px 13px; }
+
+/* Narrative text */
+.narrative { font-size: 12px; line-height: 1.85; color: var(--black); white-space: pre-wrap; font-family: inherit; }
+
+/* Certification text */
+.cert-text { font-size: 12px; line-height: 1.8; color: var(--black); margin-bottom: 14px; font-style: italic; }
+
+/* Signature block */
+.sig-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; padding-top: 14px; border-top: 1px solid var(--grey-light); margin-top: 14px; }
+.sig-line { border-bottom: 1px solid var(--black); height: 32px; font-size: 12px; color: var(--black); font-weight: 600; display: flex; align-items: flex-end; padding-bottom: 2px; }
+.sig-lbl  { font-size: 10px; color: var(--grey); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; margin-top: 3px; }
+
+.doc-footer {
+  margin-top: 18px; padding: 10px 12px; background: #F5F5F5;
+  border-radius: 6px; font-size: 10px; color: #999; line-height: 1.65;
+}
+
+/* ============================================================
+   BOTTOM ACTIONS
+   ============================================================ */
+.bottom-row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; padding-top: 6px; }
+
+/* ============================================================
+   PRINT
+   ============================================================ */
+@media print {
+  body { background: white; font-size: 11px; }
+  .app-header { position: relative; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .no-print { display: none !important; }
+  .card { box-shadow: none !important; border: 1px solid #DDD !important; break-inside: avoid; }
+  .item, .product-block { break-inside: avoid; }
+  .doc-wrap { display: block !important; }
+  .comp-doc { border: none !important; padding: 0 !important; }
+  .compliance-actions, .bottom-row { display: none !important; }
+  .steps { display: none; }
+  #section-compliance { page-break-before: always; }
+  .risk-meter, .card-head, .mbb-box, .icd-code, .cbox.checked { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     HEADER
+     ============================================================ -->
+<header class="app-header no-print">
+  <div class="brand">
+    <div class="brand-logo">🦩</div>
+    <div class="brand-wordmark">
+      <div>
+        <span class="brand-orth">Orthotica</span>
+        <span class="brand-labs"> Labs</span>
+      </div>
+      <div class="header-tool-name">LE-FRAT™ Fall Risk Assessment</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="risk-tag" id="risk-tag">Not assessed</div>
+    <div class="score-badge">
+      <span class="score-badge-num" id="hdr-score">0</span>
+      <span class="score-badge-den">/10</span>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+
+  <div class="steps no-print">
+    <div class="step-chip active" id="chip-1"><div class="step-dot"></div>Patient Info</div>
+    <div class="step-chip" id="chip-2"><div class="step-dot"></div>LE-FRAT Assessment</div>
+    <div class="step-chip" id="chip-3"><div class="step-dot"></div>Results</div>
+    <div class="step-chip" id="chip-4"><div class="step-dot"></div>Compliance Docs</div>
+  </div>
+
+  <!-- ============================================================
+       SECTION 1 · PATIENT & PROVIDER
+       ============================================================ -->
+  <div class="card" id="section-patient">
+    <div class="card-head">
+      <div class="card-icon">1</div>
+      <div>
+        <h2>Patient &amp; Provider Information</h2>
+        <p>Complete all starred fields — required for Standard Written Order and Summary of Medical Necessity</p>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="form-grid">
+        <div class="fg"><label class="fl">Patient Name ★</label><input id="pt-name" class="fc" type="text" placeholder="Last, First MI" autocomplete="off"></div>
+        <div class="fg"><label class="fl">Date of Birth ★</label><input id="pt-dob" class="fc" type="date"></div>
+        <div class="fg"><label class="fl">HICN / Medicare Beneficiary ID (MBI) ★</label><input id="pt-mbi" class="fc" type="text" placeholder="Medicare ID"></div>
+        <div class="fg"><label class="fl">Patient Address</label><input id="pt-addr" class="fc" type="text" placeholder="Street, City, State, ZIP"></div>
+        <div class="fg"><label class="fl">Date of Assessment ★</label><input id="assess-date" class="fc" type="date"></div>
+        <div class="fg"><label class="fl">Prognosis</label>
+          <select id="prognosis" class="fc"><option value="Good">Good</option><option value="Fair">Fair</option><option value="Poor">Poor</option></select>
+        </div>
+        <div class="fg"><label class="fl">Practice Name ★</label><input id="practice-name" class="fc" type="text" placeholder="Your DPM Practice"></div>
+        <div class="fg"><label class="fl">Clinician Name ★</label><input id="clinician" class="fc" type="text" placeholder="Dr. First Last, DPM"></div>
+        <div class="fg"><label class="fl">Type I NPI ★</label><input id="npi" class="fc" type="text" placeholder="10-digit NPI"></div>
+        <div class="fg"><label class="fl">Phone</label><input id="phone" class="fc" type="text" placeholder="Practice Phone"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       SECTION 2 · LE-FRAT ASSESSMENT
+       ============================================================ -->
+  <div class="card" id="section-frat">
+    <div class="card-head pink">
+      <div class="card-icon">2</div>
+      <div>
+        <h2>LE-FRAT™ Clinical Assessment</h2>
+        <p>Score 1 point per positive finding · Complete all 10 items to unlock Results and Compliance Documentation</p>
+      </div>
+    </div>
+    <div class="card-body">
+
+      <div class="banner banner-info">
+        <span class="banner-icon">📋</span>
+        <div>Lower Extremity Fall Risk Assessment Tool (LE-FRAT™). Each item contributes 1 point to the total score. Expanded clinical detail is available within each item.</div>
+      </div>
+
+      <!-- ITEM 1: FALLS HISTORY -->
+      <div class="item" id="item-1">
+        <div class="item-badge">+1</div>
+        <div class="item-top">
+          <div class="item-num">1</div>
+          <div style="flex:1">
+            <div class="item-domain">History of Falls</div>
+            <div class="item-q">Has the patient fallen in the past 12 months?</div>
+            <div class="item-hint">Include any unintentional fall to the floor or lower level. Near-falls count. Multiple falls = amplified risk.</div>
+          </div>
+        </div>
+        <div class="resp-row">
+          <button class="resp-btn" onclick="score(1,true,this)">Yes — Fallen</button>
+          <button class="resp-btn" onclick="score(1,false,this)">No — No Falls</button>
+        </div>
+      </div>
+
+      <!-- ITEM 2: TUG -->
+      <div class="item" id="item-2">
+        <div class="item-badge">+1</div>
+        <div class="item-top">
+          <div class="item-num">2</div>
+          <div style="flex:1">
+            <div class="item-domain">TUG Performance — Fall Risk Assessment Test</div>
+            <div class="item-q">Timed Up-and-Go (TUG): Does the patient take ≥ 12 seconds?</div>
+            <div class="item-hint">Patient rises from standard chair, walks 3 meters, returns, and sits. Use timer below. &lt; 12 seconds = Normal / Low Risk &nbsp;·&nbsp; ≥ 12 seconds = High Risk for Falling.</div>
+          </div>
+        </div>
+        <div class="resp-row">
+          <button class="resp-btn" onclick="score(2,true,this)">Fail — ≥ 12 sec</button>
+          <button class="resp-btn" onclick="score(2,false,this)">Pass — &lt; 12 sec</button>
+        </div>
+        <!-- TUG Timer always visible -->
+        <div class="item-detail show-always" style="display:block">
+          <div style="font-size:11px;font-weight:700;color:var(--grey);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:7px">TUG Timer</div>
+          <div class="tug-row" id="tug-block">
+            <div class="tug-time" id="tug-display">0.0s</div>
+            <button class="tbtn tbtn-start" id="btn-start" onclick="tugStart()">▶ Start</button>
+            <button class="tbtn tbtn-stop"  id="btn-stop"  onclick="tugStop()" style="display:none">■ Stop</button>
+            <button class="tbtn tbtn-reset"               onclick="tugReset()">↺ Reset</button>
+          </div>
+          <div class="tug-verdict" id="tug-verdict"></div>
+          <div style="font-size:11px;color:var(--grey);margin-top:6px">After timing, score Item 2 above accordingly. &gt;12 sec = Fail (positive).</div>
+        </div>
+      </div>
+
+      <!-- ITEM 3: GAIT -->
+      <div class="item" id="item-3">
+        <div class="item-badge">+1</div>
+        <div class="item-top">
+          <div class="item-num">3</div>
+          <div style="flex:1">
+            <div class="item-domain">Gait Observation</div>
+            <div class="item-q">Does the patient exhibit an abnormal gait pattern?</div>
+            <div class="item-hint">Observe during TUG and in-office ambulation. Check all deviations present below.</div>
+          </div>
+        </div>
+        <div class="resp-row">
+          <button class="resp-btn" onclick="score(3,true,this)">Abnormal</button>
+          <button class="resp-btn" onclick="score(3,false,this)">Normal</button>
+        </div>
+        <!-- Gait deviation checkboxes — always shown, feed into doc -->
+        <div class="item-detail show-always" style="display:block">
+          <div style="font-size:11px;font-weight:700;color:var(--grey);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:7px">Gait Evaluation — Check All That Apply</div>
+          <div class="gait-grid">
+            <label class="gait-option"><input type="checkbox" id="g-slow"> <span>Slow tentative pace</span></label>
+            <label class="gait-option"><input type="checkbox" id="g-balance"> <span>Loss of balance</span></label>
+            <label class="gait-option"><input type="checkbox" id="g-ataxia"> <span>Ataxia (uncoordinated gait)</span></label>
+            <label class="gait-option"><input type="checkbox" id="g-stride"> <span>Short strides</span></label>
+            <label class="gait-option"><input type="checkbox" id="g-arm"> <span>Little or no arm swing</span></label>
+            <label class="gait-option"><input type="checkbox" id="g-wall"> <span>Steadying self on walls</span></label>
+            <label class="gait-option"><input type="checkbox" id="g-shuffle"> <span>Shuffling</span></label>
+            <label class="gait-option"><input type="checkbox" id="g-enbloc"> <span>En bloc turning</span></label>
+            <label class="gait-option"><input type="checkbox" id="g-device"> <span>Not using assistive device properly</span></label>
+          </div>
+        </div>
+      </div>
+
+      <!-- ITEM 4: MUSCLE STRENGTH -->
+      <div class="item" id="item-4">
+        <div class="item-badge">+1</div>
+        <div class="item-top">
+          <div class="item-num">4</div>
+          <div style="flex:1">
+            <div class="item-domain">Muscle Strength</div>
+            <div class="item-q">Any foot or ankle muscle group graded below 5/5 on Manual Muscle Testing?</div>
+            <div class="item-hint">Test bilaterally. Enter grade below — any value &lt;5 auto-scores this item as positive.</div>
+          </div>
+        </div>
+        <div class="resp-row">
+          <button class="resp-btn" onclick="score(4,true,this)" id="btn-4-yes">Weak — &lt;5/5</button>
+          <button class="resp-btn" onclick="score(4,false,this)" id="btn-4-no">Normal — 5/5</button>
+        </div>
+        <!-- MMT Table always visible -->
+        <div class="item-detail show-always" style="display:block">
+          <div style="font-size:11px;font-weight:700;color:var(--grey);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px">Muscle Testing — Bilateral (any group &lt;5/5 = auto-fail)</div>
+          <table class="mmt-table" id="mmt-table"></table>
+          <div style="font-size:11px;color:var(--grey);margin-top:6px">Upon evaluation: <label class="gait-option" style="display:inline-flex"><input type="checkbox" id="mmt-bilateral"> <span>Patient has noted weakness in ankles and legs bilaterally with marked weakness around the ankles with ROM bilaterally</span></label></div>
+        </div>
+      </div>
+
+      <!-- ITEM 5: ANKLE ROM -->
+      <div class="item" id="item-5">
+        <div class="item-badge">+1</div>
+        <div class="item-top">
+          <div class="item-num">5</div>
+          <div style="flex:1">
+            <div class="item-domain">Ankle Range of Motion</div>
+            <div class="item-q">Is ankle range of motion restricted in dorsiflexion or plantarflexion?</div>
+            <div class="item-hint">WB dorsiflexion: normal ≥10°. Non-WB plantarflexion: normal ≥40°. Assess bilaterally.</div>
+          </div>
+        </div>
+        <div class="resp-row">
+          <button class="resp-btn" onclick="score(5,true,this)">Limited</button>
+          <button class="resp-btn" onclick="score(5,false,this)">Normal</button>
+        </div>
+        <div class="item-detail show-always" style="display:block;margin-top:10px">
+          <div style="display:flex;gap:12px;flex-wrap:wrap;margin-left:36px;margin-top:4px">
+            <label class="gait-option"><input type="checkbox" id="rom-tight"> <span>Patient has tightness and rigidity to ankle ROM bilaterally</span></label>
+          </div>
+          <div style="display:flex;gap:20px;margin-left:36px;margin-top:8px;flex-wrap:wrap;font-size:12px">
+            <div>Ankle R: <select id="rom-ankle-r" class="fc" style="width:auto;padding:3px 6px;font-size:12px"><option>Normal/Flexible</option><option>Limited</option><option>Fixed/Fused</option></select></div>
+            <div>Ankle L: <select id="rom-ankle-l" class="fc" style="width:auto;padding:3px 6px;font-size:12px"><option>Normal/Flexible</option><option>Limited</option><option>Fixed/Fused</option></select></div>
+            <div>Forefoot R: <select id="rom-ff-r" class="fc" style="width:auto;padding:3px 6px;font-size:12px"><option>Normal/Flexible</option><option>Limited</option><option>Fixed/Fused</option></select></div>
+            <div>Forefoot L: <select id="rom-ff-l" class="fc" style="width:auto;padding:3px 6px;font-size:12px"><option>Normal/Flexible</option><option>Limited</option><option>Fixed/Fused</option></select></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ITEM 6: FOOT PAIN -->
+      <div class="item" id="item-6">
+        <div class="item-badge">+1</div>
+        <div class="item-top">
+          <div class="item-num">6</div>
+          <div style="flex:1">
+            <div class="item-domain">Foot Pain</div>
+            <div class="item-q">Is foot or ankle pain ≥ 4/10 (NRS) with standing or walking?</div>
+            <div class="item-hint">Weight-bearing pain at any site: plantar, heel, ankle, MTP, dorsal. Rate 0–10.</div>
+          </div>
+        </div>
+        <div class="resp-row">
+          <button class="resp-btn" onclick="score(6,true,this)">Yes — ≥ 4/10</button>
+          <button class="resp-btn" onclick="score(6,false,this)">No — &lt; 4/10</button>
+        </div>
+        <div class="item-detail show-always" style="display:block;margin-left:36px;margin-top:8px">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:12px">
+            <label class="fl" style="white-space:nowrap">Pain NRS (0–10):</label>
+            <input id="pain-nrs" type="number" min="0" max="10" placeholder="0" class="fc" style="width:60px;text-align:center;padding:4px 6px">
+            <label class="gait-option"><input type="checkbox" id="pain-bilateral"> <span>Bilateral</span></label>
+          </div>
+        </div>
+      </div>
+
+      <!-- ITEM 7: FOOT DEFORMITY -->
+      <div class="item" id="item-7">
+        <div class="item-badge">+1</div>
+        <div class="item-top">
+          <div class="item-num">7</div>
+          <div style="flex:1">
+            <div class="item-domain">Foot Deformity</div>
+            <div class="item-q">Is a clinically significant structural foot or ankle deformity present?</div>
+            <div class="item-hint">Select all that apply below.</div>
+          </div>
+        </div>
+        <div class="resp-row">
+          <button class="resp-btn" onclick="score(7,true,this)">Yes — Present</button>
+          <button class="resp-btn" onclick="score(7,false,this)">No Deformity</button>
+        </div>
+        <div class="item-detail show-always" style="display:block">
+          <div class="deform-grid" style="margin-left:36px;margin-top:6px">
+            <label class="gait-option"><input type="checkbox" id="def-hv"> <span>Hallux valgus (bunion)</span></label>
+            <label class="gait-option"><input type="checkbox" id="def-ht"> <span>Hammertoes / clawtoes</span></label>
+            <label class="gait-option"><input type="checkbox" id="def-pttd"> <span>PTTD / Adult-acquired flatfoot</span></label>
+            <label class="gait-option"><input type="checkbox" id="def-flat"> <span>Pes planus (flat foot)</span></label>
+            <label class="gait-option"><input type="checkbox" id="def-cavus"> <span>Pes cavus</span></label>
+            <label class="gait-option"><input type="checkbox" id="def-charcot"> <span>Charcot arthropathy</span></label>
+            <label class="gait-option"><input type="checkbox" id="def-djd"> <span>DJD of ankle / rearfoot</span></label>
+            <label class="gait-option"><input type="checkbox" id="def-varus"> <span>Ankle varus/valgus</span></label>
+          </div>
+        </div>
+      </div>
+
+      <!-- ITEM 8: FOOTWEAR -->
+      <div class="item" id="item-8">
+        <div class="item-badge">+1</div>
+        <div class="item-top">
+          <div class="item-num">8</div>
+          <div style="flex:1">
+            <div class="item-domain">Footwear Assessment</div>
+            <div class="item-q">Is the patient's habitual footwear inadequate or unsafe for ambulation?</div>
+            <div class="item-hint">Slip-on, backless, worn soles, heel &gt;1", no secure closure (lace/strap/velcro), soft-soled slippers, or barefoot at home.</div>
+          </div>
+        </div>
+        <div class="resp-row">
+          <button class="resp-btn" onclick="score(8,true,this)">Poor / Unsafe</button>
+          <button class="resp-btn" onclick="score(8,false,this)">Appropriate</button>
+        </div>
+      </div>
+
+      <!-- ITEM 9: NEUROPATHY -->
+      <div class="item" id="item-9">
+        <div class="item-badge">+1</div>
+        <div class="item-top">
+          <div class="item-num">9</div>
+          <div style="flex:1">
+            <div class="item-domain">Neuropathy / Sensation</div>
+            <div class="item-q">Is there loss of protective sensation or a diagnosed lower-extremity neuropathy?</div>
+            <div class="item-hint">5.07/10g Semmes-Weinstein monofilament: failure at ≥1 plantar site. Or: documented DPN, peripheral neuropathy, chemo-induced neuropathy.</div>
+          </div>
+        </div>
+        <div class="resp-row">
+          <button class="resp-btn" onclick="score(9,true,this)">Present — LOPS / DPN</button>
+          <button class="resp-btn" onclick="score(9,false,this)">Absent</button>
+        </div>
+        <div class="item-detail show-always" style="display:block;margin-left:36px;margin-top:6px">
+          <label class="gait-option"><input type="checkbox" id="neuro-dizzy"> <span>Patient has lightheadedness or dizziness from lying to standing (orthostatic symptoms)</span></label>
+        </div>
+      </div>
+
+      <!-- ITEM 10: ASSISTIVE DEVICE -->
+      <div class="item" id="item-10">
+        <div class="item-badge">+1</div>
+        <div class="item-top">
+          <div class="item-num">10</div>
+          <div style="flex:1">
+            <div class="item-domain">Assistive Device Use</div>
+            <div class="item-q">Does the patient routinely require an assistive device for community ambulation?</div>
+            <div class="item-hint">Cane (single/quad), standard walker, rolling walker/rollator, Lofstrand crutches. Routine = uses for most community walking.</div>
+          </div>
+        </div>
+        <div class="resp-row">
+          <button class="resp-btn" onclick="score(10,true,this)">Yes — Uses Device</button>
+          <button class="resp-btn" onclick="score(10,false,this)">No — Independent</button>
+        </div>
+      </div>
+
+      <!-- LIVE SCORE BAR -->
+      <div class="score-bar">
+        <div class="score-track-wrap">
+          <div class="score-track-lbl">LE-FRAT Score</div>
+          <div class="score-track-sub" id="items-answered">0 of 10 items answered</div>
+          <div class="progress-wrap">
+            <div class="progress-fill" id="prog" style="width:0%"></div>
+          </div>
+        </div>
+        <div class="score-big">
+          <div class="score-big-num" id="live-num">0</div>
+          <div class="score-big-den">/ 10</div>
+        </div>
+      </div>
+
+      <!-- Clinical Notes -->
+      <div class="fg" style="margin-top:14px">
+        <label class="fl">Clinical Notes / Observations</label>
+        <textarea id="notes" class="fc" rows="3" style="resize:vertical"
+          placeholder="Document specific findings, laterality, severity, relevant PMH, medications, functional goals..."></textarea>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================
+       SECTION 3 · RESULTS
+       ============================================================ -->
+  <div class="card" id="section-results">
+    <div class="card-head dark">
+      <div class="card-icon">3</div>
+      <div>
+        <h2>Risk Classification &amp; Clinical Action Plan</h2>
+        <p>Auto-generated from LE-FRAT score — complete all 10 items above to unlock</p>
+      </div>
+    </div>
+    <div class="card-body">
+
+      <div class="pending-msg" id="results-pending">
+        <div class="pending-num">?</div>
+        <div style="margin-top:10px;font-size:13px">Complete all 10 LE-FRAT items to generate risk classification and care plan.</div>
+      </div>
+
+      <div id="results-content" style="display:none">
+        <div class="risk-meter">
+          <div class="meter-seg seg-low"  id="m-low" >🟢 LOW<br>0–1</div>
+          <div class="meter-seg seg-mod"  id="m-mod" >🟡 MODERATE<br>2–3</div>
+          <div class="meter-seg seg-high" id="m-high">🔴 HIGH<br>≥ 4</div>
+        </div>
+
+        <div class="results-row">
+          <div class="score-box">
+            <div class="score-box-lbl">LE-FRAT</div>
+            <div class="score-box-num" id="res-score">0</div>
+            <div class="score-box-den">/ 10</div>
+          </div>
+          <div class="risk-detail" id="risk-detail">
+            <div class="risk-detail-label" id="rd-label">—</div>
+            <div class="risk-detail-pct"   id="rd-pct"></div>
+            <div class="risk-detail-actions" id="rd-actions"></div>
+          </div>
+        </div>
+
+        <!-- MBB boxes -->
+        <div class="mbb-box mbb-indicated" id="mbb-yes">
+          <div class="mbb-ikon">🦾</div>
+          <div style="flex:1">
+            <div class="mbb-title">Moore Balance Brace (MBB) — CLINICALLY INDICATED</div>
+            <div class="mbb-desc">LE-FRAT score ≥ 4 confirms high fall risk. The Moore Balance Brace is medically necessary. Prescribe bilaterally. Provides proprioceptive feedback, ankle stabilization, and normalizes gait kinematics in all three planes.</div>
+            <div class="mbb-codes">
+              <div class="hchip">L1940</div><div class="hchip">L2330</div><div class="hchip">L2820</div>
+              <div class="hchip-note">PDAC-verified · Orthotica Labs exclusive fabricator · 888.895.1305</div>
+            </div>
+          </div>
+        </div>
+        <div class="mbb-box mbb-consider" id="mbb-consider">
+          <div class="mbb-ikon">🔍</div>
+          <div style="flex:1">
+            <div class="mbb-title">Moore Balance Brace — EVALUATE FOR PRESCRIPTION</div>
+            <div class="mbb-desc">Moderate risk with lower extremity deficits. Evaluate clinical judgment and patient response to PT. MBB is appropriate when specific LE findings are prominent or conservative management alone is insufficient.</div>
+            <div class="mbb-codes">
+              <div class="hchip">L1940</div><div class="hchip">L2330</div><div class="hchip">L2820</div>
+              <div class="hchip-note">Document additional medical necessity narrative if prescribing at moderate risk level</div>
+            </div>
+          </div>
+        </div>
+        <div class="mbb-box mbb-not show-block" id="mbb-not">
+          <div class="mbb-not-text">✓ <strong>Moore Balance Brace not indicated at this time.</strong> Low risk. Educate on footwear safety and fall prevention. Re-screen annually.</div>
+        </div>
+
+        <!-- Findings summary -->
+        <div style="margin-top:14px">
+          <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--grey);margin-bottom:7px">Clinical Findings Summary</div>
+          <ul class="findings-ul" id="findings-ul"></ul>
+        </div>
+
+        <!-- Evidence base -->
+        <div style="margin-top:18px;border-top:1px solid var(--grey-light);padding-top:14px">
+          <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--grey);margin-bottom:10px">Supporting Evidence — Cumulative Fall Risk</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+
+            <div style="background:#F8F8F8;border-left:3px solid var(--pink);border-radius:0 6px 6px 0;padding:9px 12px">
+              <div style="font-size:11px;font-weight:700;color:var(--black);margin-bottom:3px">Appeadu &amp; Bordoni (2023) — StatPearls</div>
+              <div style="font-size:11px;color:var(--grey-dark);line-height:1.55">Fall probability approximately doubles with each additional risk factor: <strong>8%</strong> (0 factors) → <strong>16%</strong> (1) → <strong>32%</strong> (2) → <strong>64%</strong> (3) → <strong>~78%</strong> (4+). Reinforces the multifactorial, cumulative nature of fall risk in older adults.</div>
+            </div>
+
+            <div style="background:#F8F8F8;border-left:3px solid var(--pink);border-radius:0 6px 6px 0;padding:9px 12px">
+              <div style="font-size:11px;font-weight:700;color:var(--black);margin-bottom:3px">Nevitt et al. (1989) — JAMA 261(18):2663–2668</div>
+              <div style="font-size:11px;color:var(--grey-dark);line-height:1.55">Prospective study demonstrating recurrent fall risk rises from <strong>~10%</strong> with a single risk factor to <strong>~70%</strong> with four. Foundational evidence for cumulative risk stratification.</div>
+            </div>
+
+            <div style="background:#F8F8F8;border-left:3px solid var(--pink);border-radius:0 6px 6px 0;padding:9px 12px">
+              <div style="font-size:11px;font-weight:700;color:var(--black);margin-bottom:3px">Robbins et al. (1989) — Arch Intern Med 149(7):1628–1633</div>
+              <div style="font-size:11px;color:var(--grey-dark);line-height:1.55">The presence of just three variables — hip weakness, impaired balance, and use of four or more medications — can increase fall risk from <strong>~12%</strong> to near certainty. Supports aggressive intervention when multiple deficits are present.</div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================
+       SECTION 4 · COMPLIANCE DOCUMENTATION
+       ============================================================ -->
+  <div class="card" id="section-compliance">
+    <div class="card-head pink">
+      <div class="card-icon">4</div>
+      <div>
+        <h2>Medicare Compliance Documentation</h2>
+        <p>Standard Written Order · Summary of Medical Necessity · Custom-Molded AFO — Moore Balance Brace</p>
+      </div>
+    </div>
+    <div class="card-body">
+
+      <div class="banner banner-warn">
+        <span class="banner-icon">⚠️</span>
+        <div><strong>Prescribing Physician Review Required.</strong> Generated documents must be reviewed, all fields completed, and signed by the prescribing DPM before submission. Retain originals in the patient chart per CMS requirements. Verify ICD-10 codes with your billing department.</div>
+      </div>
+
+      <div class="compliance-actions no-print">
+        <button class="btn btn-pink" onclick="generateDocs()">⚡ Generate Compliance Documents</button>
+        <button class="btn btn-outline" onclick="window.print()">🖨 Print / Save PDF</button>
+        <button class="btn btn-grey" onclick="clearAll()">↺ New Assessment</button>
+      </div>
+
+      <div class="doc-wrap" id="doc-wrap">
+
+        <!-- =============================================
+             DOC 1: STANDARD WRITTEN ORDER
+             ============================================= -->
+        <div class="comp-doc" id="doc-swo">
+          <div class="doc-brand-row">
+            <div>
+              <div class="doc-brand-logo">🦩 ORTHOTICA LABS</div>
+              <div class="doc-brand-sub">orthotica.com · 888.895.1305</div>
+            </div>
+            <div class="doc-title-block">
+              <div class="doc-title-main">Compliance Documentation Packet</div>
+              <div class="doc-title-sub">Custom-Molded AFO's</div>
+            </div>
+          </div>
+
+          <div class="doc-sec">Standard Written Order: Custom-Molded Gauntlet</div>
+
+          <div class="doc-2col" style="margin-bottom:6px">
+            <div><div class="doc-field-lbl">Doctor Name</div><div class="doc-field-val" id="swo-doc"></div></div>
+            <div><div class="doc-field-lbl">Patient Name</div><div class="doc-field-val" id="swo-pt"></div></div>
+            <div><div class="doc-field-lbl">Prognosis</div><div class="doc-field-val" id="swo-prog"></div></div>
+            <div><div class="doc-field-lbl">Duration of Usage</div><div class="doc-field-val">☑ 12 Months to long term</div></div>
+            <div><div class="doc-field-lbl">Product Brand &amp; Model</div><div class="doc-field-val" id="swo-brand"></div></div>
+            <div><div class="doc-field-lbl">Date</div><div class="doc-field-val" id="swo-date"></div></div>
+          </div>
+
+          <div style="margin-top:12px">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--grey);margin-bottom:8px">Product Information <span style="font-style:italic;font-weight:400">(check brand and model, circle base code and additions)</span></div>
+            <div class="product-block" id="swo-product"><!-- generated --></div>
+          </div>
+
+          <div style="margin-top:14px">
+            <div style="font-size:11px;font-weight:800;color:var(--pink);margin-bottom:8px">DX: (indicate all that apply)</div>
+            <div id="swo-icd"><!-- generated --></div>
+          </div>
+
+          <div style="margin-top:14px">
+            <div style="font-size:11px;font-weight:700;color:var(--grey);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">Therapeutic Objectives</div>
+            <div id="swo-objectives"><!-- generated --></div>
+          </div>
+
+          <div class="sig-grid" style="margin-top:18px">
+            <div><div class="sig-line"></div><div class="sig-lbl">Signature of Prescribing Physician</div></div>
+            <div><div class="sig-line" id="swo-npi-line"></div><div class="sig-lbl">Type I NPI</div></div>
+            <div><div class="sig-line" id="swo-pname-line"></div><div class="sig-lbl">Printed Name of Prescribing Physician</div></div>
+            <div><div class="sig-line"></div><div class="sig-lbl">Date _____ / _____ / _____</div></div>
+          </div>
+        </div>
+
+        <!-- =============================================
+             DOC 2: SUMMARY OF MEDICAL NECESSITY
+             ============================================= -->
+        <div class="comp-doc" id="doc-smn">
+          <div class="doc-brand-row">
+            <div>
+              <div class="doc-brand-logo">🦩 ORTHOTICA LABS</div>
+              <div class="doc-brand-sub">orthotica.com · 888.895.1305</div>
+            </div>
+            <div class="doc-title-block">
+              <div class="doc-title-main">Compliance Documentation Packet</div>
+              <div class="doc-title-sub">Custom-Molded AFO's</div>
+            </div>
+          </div>
+
+          <div class="doc-sec">Summary of Medical Necessity to accompany EHR note</div>
+
+          <div class="doc-2col" style="margin-bottom:12px">
+            <div><div class="doc-field-lbl">Patient Name</div><div class="doc-field-val" id="smn-pt"></div></div>
+            <div><div class="doc-field-lbl">HICN / Medicare Beneficiary ID</div><div class="doc-field-val" id="smn-mbi"></div></div>
+            <div><div class="doc-field-lbl">Prognosis</div><div class="doc-field-val">☑ Good</div></div>
+            <div><div class="doc-field-lbl">Duration of Usage</div><div class="doc-field-val">☑ 12 Months to long term</div></div>
+          </div>
+
+          <div style="font-size:12px;margin-bottom:12px" id="smn-cert-intro"><!-- generated --></div>
+
+          <div style="margin-bottom:10px" id="smn-criteria"><!-- generated --></div>
+
+          <div style="font-size:12px;font-weight:700;margin-bottom:8px">The goal of this therapy: (indicate all that apply)</div>
+          <div id="smn-goals"><!-- generated --></div>
+
+          <div style="font-size:12px;font-weight:700;margin:12px 0 8px">Necessity of Ankle Foot Orthotic molded to patient model:</div>
+          <div style="font-size:12px;margin-bottom:8px">A custom (vs. prefabricated) ankle foot orthosis has been prescribed based on the following criteria which are specific to the condition of this patient. (indicate all that apply)</div>
+          <div id="smn-custom"><!-- generated --></div>
+
+          <div style="margin-top:14px;font-size:11px;line-height:1.75;color:var(--grey-dark);border-top:1px solid var(--grey-light);padding-top:12px">
+            I hereby certify that the ankle foot orthotic described above is a rigid or semi-rigid device which is used for the purpose of supporting a weak or deformed body member or restricting or eliminating motion in a diseased or injured part of the body. It is designed to provide support and counterforce on the limb or body part that is being braced. In my opinion, the custom molded ankle foot orthosis is both reasonable and necessary in reference to accepted standards of medical practice in the treatment of the patient condition and rehabilitation.
+          </div>
+
+          <div class="sig-grid">
+            <div><div class="sig-line"></div><div class="sig-lbl">Signature of Prescribing Physician</div></div>
+            <div><div class="sig-line" id="smn-npi-line"></div><div class="sig-lbl">Type I NPI</div></div>
+            <div><div class="sig-line" id="smn-pname-line"></div><div class="sig-lbl">Printed Name of Prescribing Physician</div></div>
+            <div><div class="sig-line" id="smn-phone-line"></div><div class="sig-lbl">Phone</div></div>
+          </div>
+
+          <div class="sig-grid" style="grid-template-columns:1fr;margin-top:10px">
+            <div><div class="sig-line"></div><div class="sig-lbl">Date _____ / _____ / _____</div></div>
+          </div>
+        </div>
+
+        <!-- =============================================
+             DOC 3: SAMPLE EHR NOTE (Dr. Moore format)
+             ============================================= -->
+        <div class="comp-doc" id="doc-ehr">
+          <div class="doc-brand-row">
+            <div>
+              <div class="doc-brand-logo">🦩 ORTHOTICA LABS</div>
+              <div class="doc-brand-sub">orthotica.com · 888.895.1305</div>
+            </div>
+            <div class="doc-title-block">
+              <div class="doc-title-main">Compliance Documentation Packet</div>
+              <div class="doc-title-sub">Custom-Molded AFO's</div>
+            </div>
+          </div>
+
+          <div class="doc-sec">Sample EHR Note — Moore Balance Brace</div>
+
+          <div style="font-size:12px;font-weight:700;margin-bottom:6px">Chief Complaint:</div>
+          <div style="font-size:12px;line-height:1.8;margin-bottom:10px" id="ehr-cc"><!-- generated --></div>
+
+          <div style="font-size:12px;font-weight:700;margin-bottom:6px">Musculoskeletal — Gait Evaluation:</div>
+          <div style="margin-bottom:8px" id="ehr-gait"><!-- generated --></div>
+
+          <div style="font-size:12px;font-weight:700;margin-bottom:5px">Fall Risk Assessment Test — Timed Up and Go Test:</div>
+          <div style="font-size:12px;margin-bottom:10px" id="ehr-tug"><!-- generated --></div>
+
+          <div style="font-size:12px;font-weight:700;margin-bottom:5px">Muscle Testing:</div>
+          <div id="ehr-mmt" style="margin-bottom:10px"><!-- generated --></div>
+
+          <div style="font-size:12px;font-weight:700;margin-bottom:5px">Assessment:</div>
+          <div style="margin-bottom:8px" id="ehr-assess"><!-- generated --></div>
+
+          <div style="font-size:12px;font-weight:700;margin-bottom:5px">Plan:</div>
+          <div style="font-size:12px;line-height:1.85" id="ehr-plan"><!-- generated --></div>
+
+          <div style="font-size:12px;font-weight:700;margin-top:10px;margin-bottom:5px">Therapeutic Objectives of the AFO (Moore Balance Brace) will be to:</div>
+          <div id="ehr-objectives"><!-- generated --></div>
+
+          <div class="sig-grid" style="margin-top:18px">
+            <div><div class="sig-line"></div><div class="sig-lbl">Practitioner Signature</div></div>
+            <div><div class="sig-line" id="ehr-pname-line"></div><div class="sig-lbl">Printed Practitioner Name</div></div>
+          </div>
+          <div style="margin-top:10px"><div class="sig-lbl">Dispensing Date _____ / _____ / _____</div></div>
+
+          <div class="doc-footer">
+            <strong>References:</strong> Rubenstein LZ et al. Clin Geriatr Med 2006; CDC STEADI Initiative (2023); Nevitt MC et al. JAMA 1989; Robbins AS et al. Arch Intern Med 1989; Appeadu MK &amp; Bordoni B. StatPearls 2023; Medicare PDAC Coding Verification L1940, L2330, L2820; CMS LCD L33686 AFO/KAFO.
+            &nbsp;|&nbsp; <strong>Fabricator:</strong> Orthotica Labs — exclusive fabricator and distributor of the Moore Balance Brace Signature Edition. 29 Starflower Row, Riverhead, NY 11901.
+          </div>
+        </div>
+
+      </div><!-- end doc-wrap -->
+    </div>
+  </div>
+
+  <div class="bottom-row no-print">
+    <button class="btn btn-grey" onclick="clearAll()">↺ New Assessment</button>
+    <button class="btn btn-pink" onclick="window.print()">🖨 Print Full Report</button>
+  </div>
+
+</div><!-- end container -->
+
+<!-- ============================================================
+     JAVASCRIPT
+     ============================================================ -->
+<script>
+"use strict";
+
+/* ============================================================
+   STATE
+   ============================================================ */
+const S = { scores: {}, tugTime: null };
+
+const ITEMS = {
+  1:  { domain:'History of Falls',    text:'Fall(s) in past 12 months' },
+  2:  { domain:'TUG Performance',     text:'TUG ≥ 12 seconds (fall risk)' },
+  3:  { domain:'Gait Observation',    text:'Abnormal gait pattern observed' },
+  4:  { domain:'Muscle Strength',     text:'Foot/ankle muscle weakness (<5/5 MMT)' },
+  5:  { domain:'Ankle ROM',           text:'Restricted ankle range of motion' },
+  6:  { domain:'Foot Pain',           text:'Weight-bearing foot pain ≥ 4/10 NRS' },
+  7:  { domain:'Foot Deformity',      text:'Clinically significant foot/ankle deformity' },
+  8:  { domain:'Footwear',            text:'Inadequate or unsafe footwear' },
+  9:  { domain:'Neuropathy/Sensation','text':'Loss of protective sensation or LE neuropathy' },
+  10: { domain:'Assistive Device',    text:'Routine use of assistive device' }
+};
+
+/* ============================================================
+   TUG TIMER
+   ============================================================ */
+let tugRunning = false, tugStart_ms = null, tugInterval = null;
+
+function tugStart() {
+  tugRunning = true; tugStart_ms = Date.now();
+  document.getElementById('btn-start').style.display = 'none';
+  document.getElementById('btn-stop').style.display  = 'inline-flex';
+  document.getElementById('tug-block').classList.add('tug-running');
+  document.getElementById('tug-verdict').style.display = 'none';
+  tugInterval = setInterval(() => {
+    const t = (Date.now() - tugStart_ms) / 1000;
+    document.getElementById('tug-display').textContent = t.toFixed(1) + 's';
+  }, 100);
+}
+
+function tugStop() {
+  if (!tugRunning) return;
+  tugRunning = false; clearInterval(tugInterval);
+  S.tugTime = (Date.now() - tugStart_ms) / 1000;
+  document.getElementById('tug-display').textContent = S.tugTime.toFixed(1) + 's';
+  document.getElementById('btn-start').style.display = 'inline-flex';
+  document.getElementById('btn-stop').style.display  = 'none';
+  document.getElementById('tug-block').classList.remove('tug-running');
+  const v = document.getElementById('tug-verdict');
+  v.style.display = 'block';
+  const isAtRisk = S.tugTime >= 12;
+  if (isAtRisk) {
+    v.className = 'tug-verdict risk';
+    v.textContent = `⚠️ ${S.tugTime.toFixed(1)} sec — AT RISK (≥12 sec). Item 2 auto-scored as FAIL.`;
+  } else {
+    v.className = 'tug-verdict ok';
+    v.textContent = `✓ ${S.tugTime.toFixed(1)} sec — Normal (<12 sec). Item 2 auto-scored as PASS.`;
+  }
+  // Auto-score Item 2 based on TUG result
+  const item2 = document.getElementById('item-2');
+  const item2Btns = item2.querySelectorAll('.resp-btn');
+  // btns[0] = "Fail — ≥ 12 sec", btns[1] = "Pass — < 12 sec"
+  score(2, isAtRisk, item2Btns[isAtRisk ? 0 : 1]);
+}
+
+function tugReset() {
+  tugRunning = false; clearInterval(tugInterval); S.tugTime = null;
+  document.getElementById('tug-display').textContent = '0.0s';
+  document.getElementById('btn-start').style.display = 'inline-flex';
+  document.getElementById('btn-stop').style.display  = 'none';
+  document.getElementById('tug-block').classList.remove('tug-running');
+  document.getElementById('tug-verdict').style.display = 'none';
+}
+
+
+/* ============================================================
+   MMT TABLE BUILD + AUTO-SCORING
+   ============================================================ */
+const MMT_ROWS = [
+  {num:1, label:'Ankle Dorsiflexors',   sub:'Tibialis Anterior'},
+  {num:2, label:'Ankle Plantarflexors', sub:'Gastrocnemius / Soleus'},
+  {num:3, label:'Knee Extensors',       sub:'Quadriceps Femoris'},
+  {num:4, label:'Foot Inverters',       sub:'Posterior Tibial'},
+  {num:5, label:'Foot Everters',        sub:'Peroneal Tendons'}
+];
+
+function radioGroup(name) {
+  return [1,2,3,4,5].map(v =>
+    `<label class="mmt-radio-opt">` +
+    `<input type="radio" name="${name}" value="${v}" onchange="mmtChange()">` +
+    `<span>${v}</span></label>`
+  ).join('');
+}
+
+function buildMmtTable() {
+  const tbl = document.getElementById('mmt-table');
+  const hdr = `<thead><tr>
+    <th style="width:40%">Muscle Group</th>
+    <th style="width:30%;text-align:center">Right</th>
+    <th style="width:30%;text-align:center">Left</th>
+  </tr></thead>`;
+  const body = '<tbody>' + MMT_ROWS.map(row =>
+    `<tr>
+      <td class="mmt-muscle">${row.label}<small>${row.sub}</small></td>
+      <td><div class="mmt-radio-group">${radioGroup('mmt-' + row.num + 'r')}</div></td>
+      <td><div class="mmt-radio-group">${radioGroup('mmt-' + row.num + 'l')}</div></td>
+    </tr>`
+  ).join('') + '</tbody>';
+  tbl.innerHTML = hdr + body;
+}
+
+function mmtRadioVal(name) {
+  const sel = document.querySelector(`input[name="${name}"]:checked`);
+  return sel ? parseInt(sel.value) : null;
+}
+
+function mmtChange() {
+  const names = MMT_ROWS.flatMap(r => ['mmt-' + r.num + 'r', 'mmt-' + r.num + 'l']);
+  let hasWeak = false;
+  names.forEach(name => {
+    const v = mmtRadioVal(name);
+    if (v !== null && v < 5) hasWeak = true;
+  });
+  if (hasWeak) autoScore(4, true);
+}
+
+function getMmtValues() {
+  return MMT_ROWS.map(row => {
+    const r = mmtRadioVal('mmt-' + row.num + 'r');
+    const l = mmtRadioVal('mmt-' + row.num + 'l');
+    return {
+      label: row.label + ' (' + row.sub + ')',
+      r: r !== null ? String(r) : '—',
+      l: l !== null ? String(l) : '—',
+      weakR: r !== null && r < 5,
+      weakL: l !== null && l < 5
+    };
+  });
+}
+
+function autoScore(num, isPos) {
+  if (S.scores[num] !== undefined) return; // don't overwrite manual selection
+  S.scores[num] = isPos;
+  const item = document.getElementById('item-' + num);
+  const btns = item.querySelectorAll('.resp-btn');
+  item.classList.add(isPos ? 'scored' : 'cleared');
+  if (isPos) btns[0].classList.add('yes');
+  else       btns[1].classList.add('no');
+  recalc();
+}
+
+/* ============================================================
+   SCORING ENGINE
+   ============================================================ */
+function score(num, isPos, btn) {
+  S.scores[num] = isPos;
+  const item = document.getElementById('item-' + num);
+  item.querySelectorAll('.resp-btn').forEach(b => b.classList.remove('yes','no'));
+  btn.classList.add(isPos ? 'yes' : 'no');
+  item.classList.remove('scored','cleared');
+  item.classList.add(isPos ? 'scored' : 'cleared');
+  recalc();
+}
+
+function recalc() {
+  const answered = Object.keys(S.scores).length;
+  const total    = Object.values(S.scores).filter(v => v === true).length;
+
+  // Live score UI
+  document.getElementById('live-num').textContent       = total;
+  document.getElementById('hdr-score').textContent      = total;
+  document.getElementById('items-answered').textContent = `${answered} of 10 items answered`;
+
+  const pct = (answered / 10 * 100);
+  const pf = document.getElementById('prog');
+  pf.style.width      = pct + '%';
+  pf.style.background = total >= 4 ? 'var(--danger)' : total >= 2 ? 'var(--warn)' : 'var(--pink)';
+  document.getElementById('live-num').style.color = total >= 4 ? 'var(--danger)' : total >= 2 ? 'var(--warn)' : 'var(--pink)';
+
+  // Chips
+  setChip('chip-1', answered > 0 ? 'done' : 'active');
+  setChip('chip-2', answered >= 10 ? 'done' : answered > 0 ? 'active' : '');
+  setChip('chip-3', answered >= 10 ? 'active' : '');
+  setChip('chip-4', answered >= 10 ? 'active' : '');
+
+  if (answered < 10) {
+    document.getElementById('results-pending').style.display = 'block';
+    document.getElementById('results-content').style.display = 'none';
+    setRiskTag('', 'Not assessed');
+    return;
+  }
+  document.getElementById('results-pending').style.display = 'none';
+  document.getElementById('results-content').style.display = 'block';
+  renderResults(total);
+}
+
+function setChip(id, state) {
+  const el = document.getElementById(id);
+  el.classList.remove('active','done');
+  if (state) el.classList.add(state);
+}
+
+function setRiskTag(cls, txt) {
+  const el = document.getElementById('risk-tag');
+  el.className = 'risk-tag' + (cls ? ' ' + cls : '');
+  el.textContent = txt;
+}
+
+/* ============================================================
+   RESULTS RENDERER
+   ============================================================ */
+function renderResults(total) {
+  ['m-low','m-mod','m-high'].forEach(id => document.getElementById(id).classList.remove('active'));
+  ['mbb-yes','mbb-consider','mbb-not'].forEach(id => {
+    const el = document.getElementById(id);
+    el.classList.remove('show','show-block');
+  });
+
+  const scoreEl   = document.getElementById('res-score');
+  const detailEl  = document.getElementById('risk-detail');
+  const labelEl   = document.getElementById('rd-label');
+  const pctEl     = document.getElementById('rd-pct');
+  const actionsEl = document.getElementById('rd-actions');
+  scoreEl.textContent = total;
+  detailEl.classList.remove('low','mod','high');
+
+  if (total <= 1) {
+    document.getElementById('m-low').classList.add('active');
+    detailEl.classList.add('low');
+    scoreEl.style.color = 'var(--success)';
+    labelEl.textContent = '🟢 LOW RISK';
+    pctEl.textContent   = 'Estimated 1-year fall likelihood: ≤ 19%';
+    actionsEl.innerHTML = '• Educate on footwear fit and foot health<br>• STEADI home safety checklist (rugs, lighting, grab bars)<br>• Encourage balance and strength maintenance exercises<br>• Annual fall risk re-screen<br>• No device intervention required at this time';
+    document.getElementById('mbb-not').classList.add('show-block');
+    setRiskTag('low','LOW RISK');
+  } else if (total <= 3) {
+    document.getElementById('m-mod').classList.add('active');
+    detailEl.classList.add('mod');
+    scoreEl.style.color = 'var(--warn)';
+    labelEl.textContent = '🟡 MODERATE RISK';
+    pctEl.textContent   = 'Estimated 1-year fall likelihood: ≈ 32–60%';
+    actionsEl.innerHTML = '• <strong>Refer to Physical Therapy</strong> for balance training and strengthening<br>• Refer to Occupational Therapy for home hazard assessment<br>• Optimize footwear: therapeutic depth shoes with secure closure<br>• <strong>Evaluate for Moore Balance Brace</strong> if PT alone insufficient<br>• Address neuropathy and pain; medication review for fall-risk polypharmacy<br>• Reassess in 4–6 months';
+    document.getElementById('mbb-consider').classList.add('show');
+    setRiskTag('mod','MODERATE RISK');
+  } else {
+    document.getElementById('m-high').classList.add('active');
+    detailEl.classList.add('high');
+    scoreEl.style.color = 'var(--danger)';
+    labelEl.textContent = '🔴 HIGH RISK';
+    pctEl.textContent   = 'Estimated 1-year fall likelihood: ≈ 78%';
+    actionsEl.innerHTML = '• <strong>Immediate PT and OT referral</strong><br>• Home Health referral for in-home safety evaluation<br>• <strong>Prescribe Moore Balance Brace bilaterally</strong> — L1940 + L2330 + L2820<br>• Prescribe therapeutic depth footwear with secure closure<br>• Address neuropathy: neurology if not managed; Rx for pain/nerve symptoms<br>• Coordinate with PCP: medication reconciliation, vitamin D, ophthalmology<br>• Patient and caregiver education — written fall prevention instructions<br>• Follow-up in 3 months';
+    document.getElementById('mbb-yes').classList.add('show');
+    setRiskTag('high','HIGH RISK');
+  }
+
+  buildFindings();
+}
+
+function buildFindings() {
+  const ul = document.getElementById('findings-ul');
+  ul.innerHTML = '';
+  for (let i = 1; i <= 10; i++) {
+    if (S.scores[i] === undefined) continue;
+    const li = document.createElement('li');
+    const pos = S.scores[i] === true;
+    li.className = pos ? 'pos' : 'neg';
+    li.innerHTML = `<div class="fdot"></div><div><strong>${ITEMS[i].domain}:</strong> ${ITEMS[i].text} — <strong>${pos ? 'POSITIVE' : 'Negative'}</strong></div>`;
+    ul.appendChild(li);
+  }
+}
+
+/* ============================================================
+   HELPER: get checked gait deviations
+   ============================================================ */
+function getGaitDeviations() {
+  const checks = [
+    ['g-slow','Slow tentative pace'],['g-balance','Loss of balance'],['g-ataxia','Ataxia (uncoordinated gait)'],
+    ['g-stride','Short strides'],['g-arm','Little or no arm swing'],['g-wall','Steadying self on walls'],
+    ['g-shuffle','Shuffling'],['g-enbloc','En bloc turning'],['g-device','Not using assistive device properly']
+  ];
+  return checks.filter(([id]) => document.getElementById(id)?.checked).map(([,lbl]) => lbl);
+}
+
+
+function cbox(checked) {
+  return `<div class="cbox${checked ? ' checked' : ''}">${checked ? '✓' : ''}</div>`;
+}
+
+function getDeformities() {
+  const list = [
+    ['def-hv','Hallux valgus (bunion)'],['def-ht','Hammertoes / clawtoes'],
+    ['def-pttd','PTTD / Adult-acquired flatfoot'],['def-flat','Pes planus'],
+    ['def-cavus','Pes cavus'],['def-charcot','Charcot arthropathy'],
+    ['def-djd','DJD of ankle/rearfoot'],['def-varus','Ankle varus/valgus']
+  ];
+  return list.filter(([id]) => document.getElementById(id)?.checked).map(([,lbl]) => lbl);
+}
+
+/* ============================================================
+   ICD-10 AUTO-SELECTION (from Orthotica compliance packet)
+   ============================================================ */
+function buildIcdCodes(total) {
+  // Foot Risk / Imbalance codes — primary for fall risk / MBB
+  const icds = [];
+  const bilat = total >= 4;
+
+  // Always include core fall risk codes if risk >= moderate
+  if (total >= 2) {
+    if (S.scores[4]) icds.push({ code:'M62.81', desc:'Muscle weakness, generalized', cat:'Foot Risk/Imbalance' });
+    if (S.scores[3]) {
+      const gait = getGaitDeviations();
+      if (gait.some(g => g.toLowerCase().includes('atax'))) icds.push({ code:'R26.0', desc:'Ataxic gait', cat:'Foot Risk/Imbalance' });
+      icds.push({ code:'R26.2', desc:'Difficulty in walking', cat:'Foot Risk/Imbalance' });
+    }
+    icds.push({ code:'R26.81', desc:'Unsteadiness on feet', cat:'Foot Risk/Imbalance' });
+    if (S.scores[3] || S.scores[2]) icds.push({ code:'R26.89', desc:'Other abnormalities of gait and mobility', cat:'Foot Risk/Imbalance' });
+  }
+
+  // Ankle instability — from deformity or ROM restriction
+  if (S.scores[5] || (S.scores[7] && document.getElementById('def-pttd')?.checked)) {
+    if (bilat) {
+      icds.push({ code:'M24.871 / M24.872', desc:'Other specific joint derangements of ankle (R/L)', cat:'Lateral Ankle Instability' });
+    } else {
+      icds.push({ code:'M24.871', desc:'Other specific joint derangements of ankle, Right', cat:'Lateral Ankle Instability' });
+    }
+  }
+
+  // PTTD
+  if (document.getElementById('def-pttd')?.checked) {
+    icds.push({ code: bilat ? 'M66.871 / M66.872' : 'M66.871', desc:'Spontaneous rupture of other tendons, ankle and foot', cat:'PTTD' });
+    icds.push({ code: bilat ? 'M21.6X1 / M21.6X2' : 'M21.6X1', desc:'Other acquired deformities of foot', cat:'PTTD' });
+  }
+
+  // DJD
+  if (document.getElementById('def-djd')?.checked) {
+    icds.push({ code: bilat ? 'M19.071 / M19.072' : 'M19.071', desc:'Primary osteoarthritis, ankle and foot', cat:'DJD of Ankle & Rearfoot' });
+  }
+
+  // Pain codes
+  if (S.scores[6]) {
+    icds.push({ code: bilat ? 'M25.571 / M25.572' : 'M25.571', desc:'Pain in ankle and joints of foot', cat:'DJD of Ankle & Rearfoot' });
+    icds.push({ code: bilat ? 'M79.671 / M79.672' : 'M79.671', desc:'Pain in foot', cat:'DJD of Ankle & Rearfoot' });
+  }
+
+  // Neuropathy
+  if (S.scores[9]) {
+    icds.push({ code:'G57.90', desc:'Unspecified mononeuropathy of lower extremity', cat:'Foot Risk/Imbalance' });
+  }
+
+  // Deduplicate by code
+  const seen = new Set();
+  return icds.filter(x => { if (seen.has(x.code)) return false; seen.add(x.code); return true; });
+}
+
+/* ============================================================
+   DOCUMENT GENERATOR
+   ============================================================ */
+function generateDocs() {
+  const total    = Object.values(S.scores).filter(v => v === true).length;
+  const answered = Object.keys(S.scores).length;
+  const bilat    = total >= 4;
+
+  // Field values
+  const ptName   = v('pt-name')       || '________________________________';
+  const ptMbi    = v('pt-mbi')        || '________________________________';
+  const ptAddr   = v('pt-addr')       || '________________________________';
+  const assessDt = v('assess-date')   || today();
+  const prog     = v('prognosis')     || 'Good';
+  const practice = v('practice-name') || '________________________________';
+  const clinician= v('clinician')     || '________________________________';
+  const npi      = v('npi')           || '________________________________';
+  const phone    = v('phone')         || '________________________________';
+  const notes    = v('notes')         || 'None documented.';
+
+  const lat = bilat ? 'Bilateral' : '________________';
+  const icds = buildIcdCodes(total);
+  const mmtVals = getMmtValues();
+  const gaitDev = getGaitDeviations();
+  const deforms = getDeformities();
+
+  // ==============================
+  // SWO — Standard Written Order
+  // ==============================
+  document.getElementById('swo-doc').textContent   = clinician;
+  document.getElementById('swo-pt').textContent    = ptName;
+  document.getElementById('swo-prog').textContent  = '☑ ' + prog;
+  document.getElementById('swo-brand').textContent = 'Moore Balance Brace (MBB) — Orthotica Labs';
+  document.getElementById('swo-date').textContent  = assessDt;
+  document.getElementById('swo-npi-line').textContent   = npi;
+  document.getElementById('swo-pname-line').textContent = clinician;
+
+  // Product block
+  document.getElementById('swo-product').innerHTML = `
+    <div class="product-name">☑ Moore Balance Brace (MBB) — Laterality: <strong>${lat}</strong></div>
+    <div class="product-code-row"><div class="product-code-label">L1940</div><div>Plastic orthosis, custom molded from a model of the patient, custom fabricated, includes casting and cast preparation</div></div>
+    <div class="product-code-row"><div class="product-code-label">L2330</div><div>Addition to lower extremity, lacer molded to patient model</div></div>
+    <div class="product-code-row"><div class="product-code-label">L2820</div><div>Addition to lower extremity orthosis, soft interface for mold plastic below knee section</div></div>
+  `;
+
+  // ICD codes in SWO
+  const icdGrouped = {};
+  icds.forEach(x => {
+    if (!icdGrouped[x.cat]) icdGrouped[x.cat] = [];
+    icdGrouped[x.cat].push(x);
+  });
+  let icdHtml = '';
+  Object.entries(icdGrouped).forEach(([cat, codes]) => {
+    icdHtml += `<div style="font-size:11px;font-weight:800;color:var(--grey);text-transform:uppercase;letter-spacing:0.5px;margin:8px 0 4px">${cat}</div>`;
+    codes.forEach(c => {
+      icdHtml += `<div class="cbox-row">${cbox(true)}<div><span class="icd-code">${c.code}</span> &nbsp;${c.desc}</div></div>`;
+    });
+  });
+  if (!icdHtml) icdHtml = '<div style="font-size:12px;color:var(--grey)">No ICD-10 codes auto-selected — complete assessment to generate.</div>';
+  document.getElementById('swo-icd').innerHTML = icdHtml;
+
+  // Therapeutic objectives
+  const objList = [];
+  objList.push('Improve mobility');
+  objList.push('Improve lower extremity stability');
+  if (S.scores[6]) objList.push('Decrease pain that exists in the patient\'s joints');
+  if (S.scores[9] || S.scores[4]) objList.push('Facilitate soft tissue healing');
+  const objHtml = `<div style="display:flex;flex-wrap:wrap;gap:6px 20px">` +
+    objList.map(o => `<div class="cbox-row">${cbox(true)}<span>${o}</span></div>`).join('') +
+    `</div>`;
+  document.getElementById('swo-objectives').innerHTML = objHtml;
+
+  // ==============================
+  // SMN — Summary of Medical Necessity
+  // ==============================
+  document.getElementById('smn-pt').textContent  = ptName;
+  document.getElementById('smn-mbi').textContent = ptMbi;
+  document.getElementById('smn-npi-line').textContent   = npi;
+  document.getElementById('smn-pname-line').textContent = clinician;
+  document.getElementById('smn-phone-line').textContent = phone;
+
+  document.getElementById('smn-cert-intro').innerHTML =
+    `I certify that Mr. / Ms. <strong>${ptName}</strong> qualifies for and will benefit from an ankle foot orthosis used during ambulation based on meeting all of the following criteria. The patient is:`;
+
+  const critChecks = [
+    [true,  'Ambulatory, and'],
+    [S.scores[4] || S.scores[5] || S.scores[7], 'Has weakness or deformity of the foot and ankle, and'],
+    [true,  'Requires stabilization for medical reasons, and'],
+    [true,  'Has the potential to benefit functionally']
+  ];
+  document.getElementById('smn-criteria').innerHTML =
+    critChecks.map(([chk, lbl]) => `<div class="cbox-row">${cbox(!!chk)}<span>${lbl}</span></div>`).join('');
+
+  const goalChecks = [
+    [true,        'Improve mobility'],
+    [true,        'Improve lower extremity stability'],
+    [S.scores[6], 'Decrease pain'],
+    [false,       'Facilitate soft tissue healing'],
+    [false,       'Facilitate immobilization, healing and treatment of an injury']
+  ];
+  document.getElementById('smn-goals').innerHTML =
+    goalChecks.map(([chk, lbl]) => `<div class="cbox-row">${cbox(!!chk)}<span>${lbl}</span></div>`).join('');
+
+  const customChecks = [
+    [true,  'The patient could not be fit with a prefabricated AFO'],
+    [true,  'The condition necessitating the orthosis is expected to be permanent or of longstanding duration (more than 6 months)'],
+    [true,  'There is need to control the ankle or foot in more than one plane'],
+    [S.scores[9] || S.scores[4], 'The patient has a documented neurological, circulatory, or orthopedic condition that requires custom fabrication over a model to prevent tissue injury'],
+    [false, 'The patient has a healing fracture that lacks normal anatomical integrity or anthropometric proportions']
+  ];
+  document.getElementById('smn-custom').innerHTML =
+    customChecks.map(([chk, lbl]) => `<div class="cbox-row">${cbox(!!chk)}<span>${lbl}</span></div>`).join('');
+
+  // ==============================
+  // EHR Note (Dr. Moore format)
+  // ==============================
+  document.getElementById('ehr-pname-line').textContent = clinician;
+
+  // Chief complaint
+  const ccLines = [`Mr./Ms. <strong>${ptName}</strong> presents today with difficulty while walking and remaining steady and balanced on their feet.`];
+  if (S.scores[1]) ccLines.push('In addition to a recent history of falling, the patient\'s unsteadiness on their feet and difficulty maintaining balance with change in direction or turning has progressed.');
+  ccLines.push('Patient also notes difficulty picking feet up when walking. <em>"I\'m not steady on feet at all and feel weak in my legs and ankles."</em>');
+  if (S.scores[10]) ccLines.push('Patient notes that he/she needs to use an assistive device or hold on the furniture or walls to move throughout the house.');
+  if (S.scores[9]) ccLines.push('When asked, the patient notes that there is mild/moderate numbness in both feet making it difficult to feel where their feet are in space.');
+  document.getElementById('ehr-cc').innerHTML = ccLines.join('<br>');
+
+  // Gait eval
+  let gaitHtml = '<div style="font-size:11px;font-weight:700;color:var(--grey);margin-bottom:5px">Check All That Apply:</div>';
+  const allGait = [
+    ['g-slow','Slow tentative pace'],['g-balance','Loss of balance'],['g-ataxia','Ataxia (uncoordinated gait)'],
+    ['g-stride','4. Short strides'],['g-arm','Little or no arm swing'],['g-wall','Steadying self on walls'],
+    ['g-shuffle','Shuffling'],['g-enbloc','En bloc turning'],['g-device','Not using assistive device properly']
+  ];
+  gaitHtml += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px 10px">';
+  allGait.forEach(([id, lbl]) => {
+    const chk = document.getElementById(id)?.checked;
+    gaitHtml += `<div class="cbox-row">${cbox(chk)}<span style="font-size:11px">${lbl}</span></div>`;
+  });
+  gaitHtml += '</div>';
+  document.getElementById('ehr-gait').innerHTML = gaitHtml;
+
+  // TUG
+  let tugHtml = '';
+  if (S.tugTime !== null) {
+    const tugFail = S.tugTime >= 12;
+    tugHtml = `Time: <strong>${S.tugTime.toFixed(1)} seconds</strong> : (&gt;12 Seconds = High Risk for Falling)<br>`;
+    tugHtml += `Check: ${cbox(tugFail)} Abnormal &nbsp;&nbsp; ${cbox(!tugFail)} Normal`;
+  } else if (S.scores[2] !== undefined) {
+    const tugFail = S.scores[2] === true;
+    tugHtml = `Time: __________ seconds : (&gt;12 Seconds = High Risk for Falling)<br>`;
+    tugHtml += `Check: ${cbox(tugFail)} Abnormal &nbsp;&nbsp; ${cbox(!tugFail)} Normal`;
+  } else {
+    tugHtml = 'Time: __________ seconds<br>Check: ☐ Abnormal &nbsp;&nbsp; ☐ Normal';
+  }
+  document.getElementById('ehr-tug').innerHTML = `<div style="font-size:12px;line-height:2">${tugHtml}</div>`;
+
+  // MMT table in EHR note
+  let mmtHtml = `<table class="mmt-table"><thead><tr><th style="width:55%">Musculoskeletal/Orthopedic Exam</th><th style="text-align:center">Right / 5</th><th style="text-align:center">Left / 5</th></tr></thead><tbody>`;
+  mmtVals.forEach(row => {
+    const rDisp = row.r !== '—' ? (row.weakR ? `<span style="color:var(--danger);font-weight:800">${row.r}</span>` : row.r) : '___';
+    const lDisp = row.l !== '—' ? (row.weakL ? `<span style="color:var(--danger);font-weight:800">${row.l}</span>` : row.l) : '___';
+    mmtHtml += `<tr><td style="font-size:12px">${row.label}</td><td style="text-align:center;font-size:13px;font-weight:700">${rDisp} / 5</td><td style="text-align:center;font-size:13px;font-weight:700">${lDisp} / 5</td></tr>`;
+  });
+  mmtHtml += '</tbody></table>';
+  const isBilateral = document.getElementById('mmt-bilateral')?.checked;
+  if (isBilateral) mmtHtml += `<div class="cbox-row" style="margin-top:6px">${cbox(true)}<span style="font-size:12px">Patient has noted weakness in ankles and legs bilaterally with marked weakness around the ankles with ROM bilaterally</span></div>`;
+  if (document.getElementById('rom-tight')?.checked) {
+    mmtHtml += `<div class="cbox-row" style="margin-top:4px">${cbox(true)}<span style="font-size:12px">The patient has some tightness and rigidity to their ankle range of motion bilaterally</span></div>`;
+  }
+  if (document.getElementById('neuro-dizzy')?.checked) {
+    mmtHtml += `<div class="cbox-row" style="margin-top:4px">${cbox(true)}<span style="font-size:12px">Patient does have lightheadedness or dizziness from lying to standing</span></div>`;
+  }
+  document.getElementById('ehr-mmt').innerHTML = mmtHtml;
+
+  // Assessment (ICD checkboxes, Dr. Moore format)
+  const assessCodes = [
+    { code:'M62.81', desc:'Muscle weakness, generalized', checked: !!S.scores[4] },
+    { code:'R26.0',  desc:'Ataxic gait', checked: !!(S.scores[3] && gaitDev.some(g=>g.toLowerCase().includes('atax'))) },
+    { code:'R26.2',  desc:'Difficulty in walking', checked: !!S.scores[3] },
+    { code:'R26.81', desc:'Unsteadiness on feet', checked: total >= 2 },
+    { code:'R26.89', desc:'Other abnormalities of gait and mobility', checked: !!S.scores[3] }
+  ];
+  let assHtml = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:5px 20px">';
+  assessCodes.forEach(c => {
+    assHtml += `<div class="cbox-row">${cbox(c.checked)}<span style="font-size:12px">${c.desc} (<span class="icd-code" style="font-size:11px">${c.code}</span>)</span></div>`;
+  });
+  // Condition bilateral
+  assHtml += `<div class="cbox-row">${cbox(bilat)}<span style="font-size:12px">Condition is bilateral</span></div>`;
+  // Ankle instability
+  const hasInstab = S.scores[5] || document.getElementById('def-pttd')?.checked;
+  assHtml += `<div class="cbox-row">${cbox(hasInstab)}<span style="font-size:12px">Ankle Instability &nbsp; ${cbox(hasInstab && bilat)} Right (M24.871) &nbsp; ${cbox(hasInstab && bilat)} Left (M24.872)</span></div>`;
+  // Foot Drop
+  assHtml += `<div class="cbox-row">${cbox(false)}<span style="font-size:12px">Foot Drop, acquired &nbsp; ${cbox(false)} Right (M21.371) &nbsp; ${cbox(false)} Left (M21.372)</span></div>`;
+  assHtml += '</div>';
+  document.getElementById('ehr-assess').innerHTML = assHtml;
+
+  // Plan narrative (Dr. Moore's pre-written language)
+  const posFindings = Object.entries(S.scores).filter(([,v])=>v===true).map(([k])=>ITEMS[parseInt(k)].domain);
+  let planHtml = '';
+  planHtml += `<p style="margin-bottom:6px"><strong>Muscle Weakness:</strong> The patient was evaluated and assessed for their fall risk. The patient ${S.scores[2] ? 'failed the TUG test and' : ''} has ${S.scores[3] ? 'clear and clinically evident abnormal gait disturbances' : 'documented lower extremity deficits'} along with ${S.scores[1] ? 'a history of falling' : 'fall risk factors'}. As the patient's musculoskeletal and biomechanical condition is ${bilat ? 'bilateral and symmetrical, the patient will be cast for bilateral AFOs' : 'documented above, the patient will be cast accordingly'}.</p>`;
+  planHtml += `<p style="margin-bottom:6px">The patient was given educational information about the Life in Balance Fall Risk Management Program designed to address falls through a multifactorial treatment algorithm that includes recommendation for Physical Therapy, proper footwear for balance, an Ankle Foot Orthosis uniquely designed to address the most common fall risk factors for falling: weakness in the lower extremities, gait deficits/disturbances and balance deficits/loss of proprioception.</p>`;
+  planHtml += `<p style="margin-bottom:6px">The AFO (Moore Balance Brace) will be prescribed to enhance postural control while reducing postural sway ${bilat ? 'bilaterally' : ''}. The AFO will also address biomechanical abnormalities in all 3 planes.</p>`;
+  planHtml += `<p>This patient qualifies for and will benefit from an ankle foot orthosis used during ambulation based on meeting all of the following criteria: The patient is ambulatory, has weakness or deformity of the foot and ankle, and requires stabilization for medical reasons. Furthermore, this patient, with the use of AFO, physical therapy and proper footwear has the potential to benefit functionally while also reducing their fall risk.</p>`;
+  document.getElementById('ehr-plan').innerHTML = planHtml;
+
+  // EHR therapeutic objectives
+  const ehrObjs = [
+    'Improve mobility and stabilize gait to reduce postural instability bilaterally.',
+    'Improve lower extremity stability by using a customized orthosis that reduces postural sway and enhances ankle stability and strength that is clearly compromised.',
+    S.scores[6] ? 'Decrease pain that exists in the patient\'s joints both lower extremity and in the upper extremity by improving normal biomechanics in the foot and ankle.' : null
+  ].filter(Boolean);
+  document.getElementById('ehr-objectives').innerHTML =
+    ehrObjs.map(o => `<div class="cbox-row" style="margin-bottom:5px">${cbox(true)}<span style="font-size:12px">${o}</span></div>`).join('');
+
+  // Show docs
+  document.getElementById('doc-wrap').style.display = 'block';
+  document.getElementById('chip-4').classList.add('active');
+  document.getElementById('doc-wrap').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+/* ============================================================
+   UTILITIES
+   ============================================================ */
+function v(id) { return (document.getElementById(id)||{}).value || ''; }
+
+function today() { return new Date().toISOString().slice(0,10); }
+
+/* ============================================================
+   CLEAR / RESET
+   ============================================================ */
+function clearAll() {
+  if (!confirm('Clear all data and start a new assessment?')) return;
+  Object.keys(S.scores).forEach(k => delete S.scores[k]);
+  S.tugTime = null;
+  tugReset();
+
+  for (let i = 1; i <= 10; i++) {
+    const el = document.getElementById('item-' + i);
+    if (el) {
+      el.classList.remove('scored','cleared');
+      el.querySelectorAll('.resp-btn').forEach(b => b.classList.remove('yes','no'));
+    }
+  }
+  document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+  ['pt-name','pt-dob','pt-mbi','pt-addr','practice-name','clinician','npi','phone','notes','pain-nrs'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  buildMmtTable(); // rebuilds radio groups fresh, clearing all selections
+  document.getElementById('assess-date').value = today();
+  document.getElementById('prognosis').value = 'Good';
+  document.getElementById('live-num').textContent = '0';
+  document.getElementById('live-num').style.color = 'var(--pink)';
+  document.getElementById('hdr-score').textContent = '0';
+  document.getElementById('items-answered').textContent = '0 of 10 items answered';
+  document.getElementById('prog').style.width = '0%';
+  document.getElementById('results-pending').style.display = 'block';
+  document.getElementById('results-content').style.display = 'none';
+  document.getElementById('doc-wrap').style.display = 'none';
+  setRiskTag('','Not assessed');
+  ['chip-1','chip-2','chip-3','chip-4'].forEach(id => {
+    const el = document.getElementById(id);
+    el.classList.remove('done','active');
+  });
+  document.getElementById('chip-1').classList.add('active');
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+
+/* ============================================================
+   INIT
+   ============================================================ */
+buildMmtTable();
+document.getElementById('assess-date').value = today();
+</script>
+</body>
+</html>
