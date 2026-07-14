@@ -44,8 +44,10 @@ counsel-reviewed architecture decision:
 3. No `localStorage`/`sessionStorage`/IndexedDB for assessment data.
 4. No patient data in URLs (no query-string state, no share links).
 5. `netlify.toml` ships a Content-Security-Policy that enforces 1 and 2 at the
-   browser level (`connect-src 'none'`, `default-src 'none'`). Leave it intact;
-   if a change breaks the page under CSP, the change is the problem.
+   browser level (`connect-src 'none'`, `default-src 'none'`; `img-src data:`
+   permits only inline-embedded images and fonts (logo, Poppins) — no network fetches).
+   Leave it intact; if a change breaks the page under CSP, the change is the
+   problem.
 6. Never commit patient data (real or test screenshots containing it) to this
    repository.
 
