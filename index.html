@@ -478,9 +478,11 @@ body {
 .cbox {
   width: 13px; height: 13px; border: 1.5px solid var(--grey); border-radius: 2px;
   flex-shrink: 0; margin-top: 1px; display: inline-flex; align-items: center; justify-content: center;
-  background: white; font-size: 9px; font-weight: 900;
+  background: white; font-size: 9px; font-weight: 900; cursor: pointer;
 }
+.cbox:hover { border-color: var(--pink); }
 .cbox.checked { background: var(--pink); border-color: var(--pink); color: white; }
+.gait-option input[type="radio"] { accent-color: var(--pink); width: 14px; height: 14px; cursor: pointer; }
 
 /* Score boxes in doc */
 .doc-score-boxes { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0; }
@@ -842,6 +844,28 @@ body {
         </div>
       </div>
 
+      <!-- DOCUMENTATION ATTESTATIONS (not scored) -->
+      <div class="item" id="attest-block">
+        <div class="item-top">
+          <div class="item-num">✓</div>
+          <div style="flex:1">
+            <div class="item-domain">Documentation Attestations — Not Scored</div>
+            <div class="item-q">Required for the Summary of Medical Necessity and ICD-10 laterality. Attest only to what was evaluated today.</div>
+          </div>
+        </div>
+        <div style="margin-top:10px">
+          <label class="gait-option"><input type="checkbox" id="pt-ambulatory"> <span>Patient is ambulatory (with or without an assistive device)</span></label>
+        </div>
+        <div style="margin-top:12px">
+          <div style="font-size:11px;font-weight:700;color:var(--grey);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px">Laterality of condition — drives ICD-10 code selection and order laterality</div>
+          <div style="display:flex;gap:18px;flex-wrap:wrap">
+            <label class="gait-option"><input type="radio" name="laterality" value="bilateral"> <span>Bilateral</span></label>
+            <label class="gait-option"><input type="radio" name="laterality" value="right"> <span>Right</span></label>
+            <label class="gait-option"><input type="radio" name="laterality" value="left"> <span>Left</span></label>
+          </div>
+        </div>
+      </div>
+
       <!-- LIVE SCORE BAR -->
       <div class="score-bar">
         <div class="score-track-wrap">
@@ -1061,7 +1085,7 @@ body {
           <div class="doc-2col" style="margin-bottom:12px">
             <div><div class="doc-field-lbl">Patient Name</div><div class="doc-field-val" id="smn-pt"></div></div>
             <div><div class="doc-field-lbl">HICN / Medicare Beneficiary ID</div><div class="doc-field-val" id="smn-mbi"></div></div>
-            <div><div class="doc-field-lbl">Prognosis</div><div class="doc-field-val">☑ Good</div></div>
+            <div><div class="doc-field-lbl">Prognosis</div><div class="doc-field-val" id="smn-prog"></div></div>
             <div><div class="doc-field-lbl">Duration of Usage</div><div class="doc-field-val">☑ 12 Months to long term</div></div>
           </div>
 
@@ -1439,7 +1463,20 @@ function getGaitDeviations() {
 
 
 function cbox(checked) {
-  return `<div class="cbox${checked ? ' checked' : ''}">${checked ? '✓' : ''}</div>`;
+  return `<div class="cbox${checked ? ' checked' : ''}" onclick="toggleCbox(this)" role="checkbox" aria-checked="${!!checked}" title="Click to check or uncheck">${checked ? '✓' : ''}</div>`;
+}
+
+/* Every generated checkbox is clickable — the clinician can check or
+   uncheck anything before printing. Nothing is locked on. */
+function toggleCbox(el) {
+  const on = el.classList.toggle('checked');
+  el.textContent = on ? '✓' : '';
+  el.setAttribute('aria-checked', on);
+}
+
+function getLaterality() {
+  const sel = document.querySelector('input[name="laterality"]:checked');
+  return sel ? sel.value : null;
 }
 
 function getDeformities() {
@@ -1455,10 +1492,19 @@ function getDeformities() {
 /* ============================================================
    ICD-10 AUTO-SELECTION (from Orthotica compliance packet)
    ============================================================ */
-function buildIcdCodes(total) {
+function buildIcdCodes(total, laterality) {
   // Foot Risk / Imbalance codes — primary for fall risk / MBB
   const icds = [];
-  const bilat = total >= 4;
+  let needsLaterality = false;
+
+  // Laterality-specific codes are only generated once the clinician has
+  // selected laterality in Section 2 — never assumed from the score.
+  const sideCode = (r, l) => laterality === 'bilateral' ? `${r} / ${l}` : (laterality === 'left' ? l : r);
+  const sideDesc = laterality === 'bilateral' ? ' (R/L)' : (laterality === 'left' ? ' (Left)' : ' (Right)');
+  const pushSided = (r, l, desc, cat) => {
+    if (!laterality) { needsLaterality = true; return; }
+    icds.push({ code: sideCode(r, l), desc: desc + sideDesc, cat });
+  };
 
   // Always include core fall risk codes if risk >= moderate
   if (total >= 2) {
@@ -1474,28 +1520,24 @@ function buildIcdCodes(total) {
 
   // Ankle instability — from deformity or ROM restriction
   if (S.scores[5] || (S.scores[7] && document.getElementById('def-pttd')?.checked)) {
-    if (bilat) {
-      icds.push({ code:'M24.871 / M24.872', desc:'Other specific joint derangements of ankle (R/L)', cat:'Lateral Ankle Instability' });
-    } else {
-      icds.push({ code:'M24.871', desc:'Other specific joint derangements of ankle, Right', cat:'Lateral Ankle Instability' });
-    }
+    pushSided('M24.871', 'M24.872', 'Other specific joint derangements of ankle', 'Lateral Ankle Instability');
   }
 
   // PTTD
   if (document.getElementById('def-pttd')?.checked) {
-    icds.push({ code: bilat ? 'M66.871 / M66.872' : 'M66.871', desc:'Spontaneous rupture of other tendons, ankle and foot', cat:'PTTD' });
-    icds.push({ code: bilat ? 'M21.6X1 / M21.6X2' : 'M21.6X1', desc:'Other acquired deformities of foot', cat:'PTTD' });
+    pushSided('M66.871', 'M66.872', 'Spontaneous rupture of other tendons, ankle and foot', 'PTTD');
+    pushSided('M21.6X1', 'M21.6X2', 'Other acquired deformities of foot', 'PTTD');
   }
 
   // DJD
   if (document.getElementById('def-djd')?.checked) {
-    icds.push({ code: bilat ? 'M19.071 / M19.072' : 'M19.071', desc:'Primary osteoarthritis, ankle and foot', cat:'DJD of Ankle & Rearfoot' });
+    pushSided('M19.071', 'M19.072', 'Primary osteoarthritis, ankle and foot', 'DJD of Ankle & Rearfoot');
   }
 
   // Pain codes
   if (S.scores[6]) {
-    icds.push({ code: bilat ? 'M25.571 / M25.572' : 'M25.571', desc:'Pain in ankle and joints of foot', cat:'DJD of Ankle & Rearfoot' });
-    icds.push({ code: bilat ? 'M79.671 / M79.672' : 'M79.671', desc:'Pain in foot', cat:'DJD of Ankle & Rearfoot' });
+    pushSided('M25.571', 'M25.572', 'Pain in ankle and joints of foot', 'DJD of Ankle & Rearfoot');
+    pushSided('M79.671', 'M79.672', 'Pain in foot', 'DJD of Ankle & Rearfoot');
   }
 
   // Neuropathy
@@ -1505,7 +1547,7 @@ function buildIcdCodes(total) {
 
   // Deduplicate by code
   const seen = new Set();
-  return icds.filter(x => { if (seen.has(x.code)) return false; seen.add(x.code); return true; });
+  return { icds: icds.filter(x => { if (seen.has(x.code)) return false; seen.add(x.code); return true; }), needsLaterality };
 }
 
 /* ============================================================
@@ -1514,7 +1556,11 @@ function buildIcdCodes(total) {
 function generateDocs() {
   const total    = Object.values(S.scores).filter(v => v === true).length;
   const answered = Object.keys(S.scores).length;
-  const bilat    = total >= 4;
+  // Laterality comes from the clinician's explicit selection in Section 2 —
+  // it is never inferred from the score.
+  const laterality  = getLaterality();
+  const bilat       = laterality === 'bilateral';
+  const ambulatory  = document.getElementById('pt-ambulatory')?.checked;
 
   // Field values
   const ptName   = v('pt-name')       || '________________________________';
@@ -1528,8 +1574,8 @@ function generateDocs() {
   const phone    = v('phone')         || '________________________________';
   const notes    = v('notes')         || 'None documented.';
 
-  const lat = bilat ? 'Bilateral' : '________________';
-  const icds = buildIcdCodes(total);
+  const lat = laterality ? ({ bilateral:'Bilateral', right:'Right', left:'Left' })[laterality] : '________________';
+  const { icds, needsLaterality } = buildIcdCodes(total, laterality);
   const mmtVals = getMmtValues();
   const gaitDev = getGaitDeviations();
   const deforms = getDeformities();
@@ -1567,6 +1613,7 @@ function generateDocs() {
     });
   });
   if (!icdHtml) icdHtml = '<div style="font-size:12px;color:var(--grey)">No ICD-10 codes auto-selected — complete assessment to generate.</div>';
+  if (needsLaterality) icdHtml += '<div class="no-print" style="font-size:11px;color:var(--danger);font-weight:700;margin-top:8px">⚠ Laterality not selected — laterality-specific ICD-10 codes (ankle derangement, PTTD, DJD, pain) were omitted. Select laterality in Section 2 and regenerate.</div>';
   document.getElementById('swo-icd').innerHTML = icdHtml;
 
   // Therapeutic objectives
@@ -1585,6 +1632,7 @@ function generateDocs() {
   // ==============================
   document.getElementById('smn-pt').textContent  = ptName;
   document.getElementById('smn-mbi').textContent = ptMbi;
+  document.getElementById('smn-prog').textContent = '☑ ' + prog;
   document.getElementById('smn-npi-line').textContent   = npi;
   document.getElementById('smn-pname-line').textContent = clinician;
   document.getElementById('smn-phone-line').textContent = phone;
@@ -1593,7 +1641,8 @@ function generateDocs() {
     `I certify that Mr. / Ms. <strong>${ptName}</strong> qualifies for and will benefit from an ankle foot orthosis used during ambulation based on meeting all of the following criteria. The patient is:`;
 
   const critChecks = [
-    [true,  'Ambulatory, and'],
+    // 'Ambulatory' traces to the explicit attestation in Section 2 — never assumed.
+    [ambulatory, 'Ambulatory, and'],
     [S.scores[4] || S.scores[5] || S.scores[7], 'Has weakness or deformity of the foot and ankle, and'],
     [true,  'Requires stabilization for medical reasons, and'],
     [true,  'Has the potential to benefit functionally']
@@ -1611,11 +1660,14 @@ function generateDocs() {
   document.getElementById('smn-goals').innerHTML =
     goalChecks.map(([chk, lbl]) => `<div class="cbox-row">${cbox(!!chk)}<span>${lbl}</span></div>`).join('');
 
+  // Custom-vs-prefab necessity: NOTHING is preselected here. These are
+  // clinical judgments the prescribing physician must actively attest to —
+  // click the boxes that apply before printing.
   const customChecks = [
-    [true,  'The patient could not be fit with a prefabricated AFO'],
-    [true,  'The condition necessitating the orthosis is expected to be permanent or of longstanding duration (more than 6 months)'],
-    [true,  'There is need to control the ankle or foot in more than one plane'],
-    [S.scores[9] || S.scores[4], 'The patient has a documented neurological, circulatory, or orthopedic condition that requires custom fabrication over a model to prevent tissue injury'],
+    [false, 'The patient could not be fit with a prefabricated AFO'],
+    [false, 'The condition necessitating the orthosis is expected to be permanent or of longstanding duration (more than 6 months)'],
+    [false, 'There is need to control the ankle or foot in more than one plane'],
+    [false, 'The patient has a documented neurological, circulatory, or orthopedic condition that requires custom fabrication over a model to prevent tissue injury'],
     [false, 'The patient has a healing fracture that lacks normal anatomical integrity or anthropometric proportions']
   ];
   document.getElementById('smn-custom').innerHTML =
@@ -1696,9 +1748,9 @@ function generateDocs() {
   });
   // Condition bilateral
   assHtml += `<div class="cbox-row">${cbox(bilat)}<span style="font-size:12px">Condition is bilateral</span></div>`;
-  // Ankle instability
+  // Ankle instability — R/L follow the clinician-selected laterality
   const hasInstab = S.scores[5] || document.getElementById('def-pttd')?.checked;
-  assHtml += `<div class="cbox-row">${cbox(hasInstab)}<span style="font-size:12px">Ankle Instability &nbsp; ${cbox(hasInstab && bilat)} Right (M24.871) &nbsp; ${cbox(hasInstab && bilat)} Left (M24.872)</span></div>`;
+  assHtml += `<div class="cbox-row">${cbox(hasInstab)}<span style="font-size:12px">Ankle Instability &nbsp; ${cbox(hasInstab && (bilat || laterality === 'right'))} Right (M24.871) &nbsp; ${cbox(hasInstab && (bilat || laterality === 'left'))} Left (M24.872)</span></div>`;
   // Foot Drop
   assHtml += `<div class="cbox-row">${cbox(false)}<span style="font-size:12px">Foot Drop, acquired &nbsp; ${cbox(false)} Right (M21.371) &nbsp; ${cbox(false)} Left (M21.372)</span></div>`;
   assHtml += '</div>';
@@ -1707,10 +1759,18 @@ function generateDocs() {
   // Plan narrative (Dr. Moore's pre-written language)
   const posFindings = Object.entries(S.scores).filter(([,v])=>v===true).map(([k])=>ITEMS[parseInt(k)].domain);
   let planHtml = '';
-  planHtml += `<p style="margin-bottom:6px"><strong>Muscle Weakness:</strong> The patient was evaluated and assessed for their fall risk. The patient ${S.scores[2] ? 'failed the TUG test and' : ''} has ${S.scores[3] ? 'clear and clinically evident abnormal gait disturbances' : 'documented lower extremity deficits'} along with ${S.scores[1] ? 'a history of falling' : 'fall risk factors'}. As the patient's musculoskeletal and biomechanical condition is ${bilat ? 'bilateral and symmetrical, the patient will be cast for bilateral AFOs' : 'documented above, the patient will be cast accordingly'}.</p>`;
+  const castTxt = bilat ? 'bilateral and symmetrical, the patient will be cast for bilateral AFOs'
+    : laterality ? `unilateral (${laterality}), the patient will be cast for a ${laterality} AFO`
+    : 'documented above, the patient will be cast accordingly';
+  planHtml += `<p style="margin-bottom:6px"><strong>Muscle Weakness:</strong> The patient was evaluated and assessed for their fall risk. The patient ${S.scores[2] ? 'failed the TUG test and' : ''} has ${S.scores[3] ? 'clear and clinically evident abnormal gait disturbances' : 'documented lower extremity deficits'} along with ${S.scores[1] ? 'a history of falling' : 'fall risk factors'}. As the patient's musculoskeletal and biomechanical condition is ${castTxt}.</p>`;
   planHtml += `<p style="margin-bottom:6px">The patient was given educational information about the Life in Balance Fall Risk Management Program designed to address falls through a multifactorial treatment algorithm that includes recommendation for Physical Therapy, proper footwear for balance, an Ankle Foot Orthosis uniquely designed to address the most common fall risk factors for falling: weakness in the lower extremities, gait deficits/disturbances and balance deficits/loss of proprioception.</p>`;
   planHtml += `<p style="margin-bottom:6px">The AFO (Moore Balance Brace) will be prescribed to enhance postural control while reducing postural sway ${bilat ? 'bilaterally' : ''}. The AFO will also address biomechanical abnormalities in all 3 planes.</p>`;
-  planHtml += `<p>This patient qualifies for and will benefit from an ankle foot orthosis used during ambulation based on meeting all of the following criteria: The patient is ambulatory, has weakness or deformity of the foot and ankle, and requires stabilization for medical reasons. Furthermore, this patient, with the use of AFO, physical therapy and proper footwear has the potential to benefit functionally while also reducing their fall risk.</p>`;
+  // Qualification sentence only asserts what was attested / found in this assessment.
+  const qualParts = [];
+  if (ambulatory) qualParts.push('is ambulatory');
+  if (S.scores[4] || S.scores[5] || S.scores[7]) qualParts.push('has weakness or deformity of the foot and ankle');
+  qualParts.push('requires stabilization for medical reasons');
+  planHtml += `<p>This patient qualifies for and will benefit from an ankle foot orthosis used during ambulation based on meeting all of the following criteria: The patient ${qualParts.join(', ')}. Furthermore, this patient, with the use of AFO, physical therapy and proper footwear has the potential to benefit functionally while also reducing their fall risk.</p>`;
   document.getElementById('ehr-plan').innerHTML = planHtml;
 
   // EHR therapeutic objectives
@@ -1752,6 +1812,7 @@ function clearAll() {
     }
   }
   document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+  document.querySelectorAll('input[name="laterality"]').forEach(r => r.checked = false);
   ['pt-name','pt-dob','pt-mbi','pt-addr','practice-name','clinician','npi','phone','notes','pain-nrs'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = '';
