@@ -1,0 +1,19 @@
+# Netlify configuration — static single-page site, no build step.
+[build]
+  publish = "."
+  command = ""
+
+# Security headers.
+#
+# The Content-Security-Policy below is load-bearing for the privacy posture of
+# this tool: connect-src 'none' and form-action 'none' mean the page CANNOT
+# transmit anything (patient data included) to any server, and default-src
+# 'none' blocks loading any external resource. If a future change needs a
+# network call or an external script/font/image, that is an architecture
+# change — read the "Patient data policy" section of README.md first.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Content-Security-Policy = "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'none'; form-action 'none'; base-uri 'none'; frame-ancestors 'self'"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "no-referrer"
