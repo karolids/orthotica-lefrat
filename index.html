@@ -1618,14 +1618,16 @@ function generateDocs() {
   if (needsLaterality) icdHtml += '<div class="no-print" style="font-size:11px;color:var(--danger);font-weight:700;margin-top:8px">⚠ Laterality not selected — laterality-specific ICD-10 codes (ankle derangement, PTTD, DJD, pain) were omitted. Select laterality in Section 2 and regenerate.</div>';
   document.getElementById('swo-icd').innerHTML = icdHtml;
 
-  // Therapeutic objectives
-  const objList = [];
-  objList.push('Improve mobility');
-  objList.push('Improve lower extremity stability');
-  if (S.scores[6]) objList.push('Decrease pain that exists in the patient\'s joints');
-  if (S.scores[9] || S.scores[4]) objList.push('Facilitate soft tissue healing');
+  // Therapeutic objectives — physician judgments start UNCHECKED; only
+  // 'Decrease pain' auto-checks because it traces to Item 6 (pain ≥ 4/10).
+  const objChecks = [
+    [false,       'Improve mobility'],
+    [false,       'Improve lower extremity stability'],
+    [S.scores[6], 'Decrease pain that exists in the patient\'s joints'],
+    [false,       'Facilitate soft tissue healing']
+  ];
   const objHtml = `<div style="display:flex;flex-wrap:wrap;gap:6px 20px">` +
-    objList.map(o => `<div class="cbox-row">${cbox(true)}<span>${o}</span></div>`).join('') +
+    objChecks.map(([chk, o]) => `<div class="cbox-row">${cbox(!!chk)}<span>${o}</span></div>`).join('') +
     `</div>`;
   document.getElementById('swo-objectives').innerHTML = objHtml;
 
@@ -1646,15 +1648,18 @@ function generateDocs() {
     // 'Ambulatory' traces to the explicit attestation in Section 2 — never assumed.
     [ambulatory, 'Ambulatory, and'],
     [S.scores[4] || S.scores[5] || S.scores[7], 'Has weakness or deformity of the foot and ankle, and'],
-    [true,  'Requires stabilization for medical reasons, and'],
-    [true,  'Has the potential to benefit functionally']
+    // Physician judgments — never preselected, click to attest.
+    [false, 'Requires stabilization for medical reasons, and'],
+    [false, 'Has the potential to benefit functionally']
   ];
   document.getElementById('smn-criteria').innerHTML =
     critChecks.map(([chk, lbl]) => `<div class="cbox-row">${cbox(!!chk)}<span>${lbl}</span></div>`).join('');
 
   const goalChecks = [
-    [true,        'Improve mobility'],
-    [true,        'Improve lower extremity stability'],
+    // Goals are physician judgments — never preselected. Only 'Decrease
+    // pain' auto-checks (traces to Item 6).
+    [false,       'Improve mobility'],
+    [false,       'Improve lower extremity stability'],
     [S.scores[6], 'Decrease pain'],
     [false,       'Facilitate soft tissue healing'],
     [false,       'Facilitate immobilization, healing and treatment of an injury']
@@ -1768,21 +1773,28 @@ function generateDocs() {
   planHtml += `<p style="margin-bottom:6px">The patient was given educational information about the Life in Balance Fall Risk Management Program designed to address falls through a multifactorial treatment algorithm that includes recommendation for Physical Therapy, proper footwear for balance, an Ankle Foot Orthosis uniquely designed to address the most common fall risk factors for falling: weakness in the lower extremities, gait deficits/disturbances and balance deficits/loss of proprioception.</p>`;
   planHtml += `<p style="margin-bottom:6px">The AFO (Moore Balance Brace) will be prescribed to enhance postural control while reducing postural sway ${bilat ? 'bilaterally' : ''}. The AFO will also address biomechanical abnormalities in all 3 planes.</p>`;
   // Qualification sentence only asserts what was attested / found in this assessment.
+  // Only assert criteria that trace to the assessment or attestations.
+  // 'Requires stabilization' and 'potential to benefit' are physician
+  // judgments made on the SMN checkboxes, not auto-written into the note.
   const qualParts = [];
   if (ambulatory) qualParts.push('is ambulatory');
   if (S.scores[4] || S.scores[5] || S.scores[7]) qualParts.push('has weakness or deformity of the foot and ankle');
-  qualParts.push('requires stabilization for medical reasons');
-  planHtml += `<p>This patient qualifies for and will benefit from an ankle foot orthosis used during ambulation based on meeting all of the following criteria: The patient ${qualParts.join(', ')}. Furthermore, this patient, with the use of AFO, physical therapy and proper footwear has the potential to benefit functionally while also reducing their fall risk.</p>`;
+  if (qualParts.length) {
+    planHtml += `<p>This patient qualifies for and will benefit from an ankle foot orthosis used during ambulation based on meeting the criteria attested in the Summary of Medical Necessity: the patient ${qualParts.join(' and ')}. Remaining qualification criteria are as indicated by the physician on the Summary of Medical Necessity.</p>`;
+  } else {
+    planHtml += `<p>Qualification criteria for the ankle foot orthosis are as indicated by the physician on the accompanying Summary of Medical Necessity.</p>`;
+  }
   document.getElementById('ehr-plan').innerHTML = planHtml;
 
-  // EHR therapeutic objectives
+  // EHR therapeutic objectives — physician judgments start UNCHECKED;
+  // the pain objective auto-checks only when Item 6 scored positive.
   const ehrObjs = [
-    'Improve mobility and stabilize gait to reduce postural instability bilaterally.',
-    'Improve lower extremity stability by using a customized orthosis that reduces postural sway and enhances ankle stability and strength that is clearly compromised.',
-    S.scores[6] ? 'Decrease pain that exists in the patient\'s joints both lower extremity and in the upper extremity by improving normal biomechanics in the foot and ankle.' : null
+    [false, 'Improve mobility and stabilize gait to reduce postural instability bilaterally.'],
+    [false, 'Improve lower extremity stability by using a customized orthosis that reduces postural sway and enhances ankle stability and strength that is clearly compromised.'],
+    S.scores[6] ? [true, 'Decrease pain that exists in the patient\'s joints both lower extremity and in the upper extremity by improving normal biomechanics in the foot and ankle.'] : null
   ].filter(Boolean);
   document.getElementById('ehr-objectives').innerHTML =
-    ehrObjs.map(o => `<div class="cbox-row" style="margin-bottom:5px">${cbox(true)}<span style="font-size:12px">${o}</span></div>`).join('');
+    ehrObjs.map(([chk, o]) => `<div class="cbox-row" style="margin-bottom:5px">${cbox(!!chk)}<span style="font-size:12px">${o}</span></div>`).join('');
 
   // Show docs
   document.getElementById('doc-wrap').style.display = 'block';
