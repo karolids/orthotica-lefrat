@@ -523,8 +523,24 @@ body {
 .cbox.attest:not(.checked) { border: 1.5px dashed #E6A23C; background: #FFF9EE; }
 .cbox.attest:not(.checked):hover { border-color: #C87F1B; }
 
-/* Readiness panel */
-.readiness { scroll-margin-top: 74px; border: 1px solid var(--grey-light); border-radius: 10px; padding: 14px 16px; margin-bottom: 14px; background: var(--grey-bg); }
+/* Readiness sidebar */
+.ready-fab {
+  position: fixed; right: 18px; bottom: 18px; z-index: 60;
+  border: none; border-radius: 999px; padding: 11px 18px; cursor: pointer;
+  background: var(--black); color: white; font-family: inherit; font-size: 13px; font-weight: 700;
+  display: flex; align-items: center; gap: 9px; box-shadow: 0 4px 16px rgba(0,0,0,0.28);
+}
+.ready-fab .cnt { background: #C87F1B; color: white; border-radius: 999px; padding: 1px 9px; font-size: 12px; font-weight: 800; }
+.ready-fab.all-clear .cnt { background: var(--ok); }
+.ready-panel {
+  position: fixed; top: 0; right: 0; height: 100%; width: min(370px, 92vw); z-index: 59;
+  background: white; box-shadow: -8px 0 28px rgba(0,0,0,0.18);
+  transform: translateX(105%); transition: transform 0.25s ease;
+  padding: 16px 18px 110px; overflow-y: auto;
+}
+.ready-panel.open { transform: none; }
+.ready-panel-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; border-bottom: 1px solid var(--grey-light); padding-bottom: 10px; }
+.ready-close { border: none; background: var(--grey-bg); border-radius: 6px; width: 28px; height: 28px; cursor: pointer; font-size: 13px; color: var(--grey-dark); }
 .readiness-title { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--grey-dark); margin-bottom: 9px; }
 .ready-row { display: flex; align-items: flex-start; gap: 8px; font-size: 12.5px; margin-bottom: 5px; color: var(--grey-dark); }
 .ready-row .ri { flex-shrink: 0; font-weight: 900; width: 16px; text-align: center; }
@@ -1037,8 +1053,6 @@ body {
         <button class="btn btn-grey" onclick="clearAll()">↺ New Assessment</button>
       </div>
 
-      <div class="readiness no-print" id="readiness" style="display:none"></div>
-
       <div class="doc-wrap" id="doc-wrap">
 
         <!-- =============================================
@@ -1062,10 +1076,12 @@ body {
           <div class="doc-2col" style="margin-bottom:6px">
             <div><div class="doc-field-lbl">Doctor Name</div><div class="doc-field-val" id="swo-doc"></div></div>
             <div><div class="doc-field-lbl">Patient Name</div><div class="doc-field-val" id="swo-pt"></div></div>
+            <div><div class="doc-field-lbl">Patient Date of Birth</div><div class="doc-field-val" id="swo-dob"></div></div>
+            <div><div class="doc-field-lbl">HICN / Medicare Beneficiary ID</div><div class="doc-field-val" id="swo-mbi"></div></div>
             <div><div class="doc-field-lbl">Prognosis</div><div class="doc-field-val" id="swo-prog"></div></div>
             <div><div class="doc-field-lbl">Duration of Usage</div><div class="doc-field-val">☑ 12 Months to long term</div></div>
             <div><div class="doc-field-lbl">Product Brand &amp; Model</div><div class="doc-field-val" id="swo-brand"></div></div>
-            <div><div class="doc-field-lbl">Date</div><div class="doc-field-val" id="swo-date"></div></div>
+            <div><div class="doc-field-lbl">Date of Assessment</div><div class="doc-field-val" id="swo-date"></div></div>
           </div>
 
           <div style="margin-top:12px">
@@ -1112,6 +1128,8 @@ body {
           <div class="doc-2col" style="margin-bottom:12px">
             <div><div class="doc-field-lbl">Patient Name</div><div class="doc-field-val" id="smn-pt"></div></div>
             <div><div class="doc-field-lbl">HICN / Medicare Beneficiary ID</div><div class="doc-field-val" id="smn-mbi"></div></div>
+            <div><div class="doc-field-lbl">Patient Date of Birth</div><div class="doc-field-val" id="smn-dob"></div></div>
+            <div><div class="doc-field-lbl">Date of Assessment</div><div class="doc-field-val" id="smn-date"></div></div>
             <div><div class="doc-field-lbl">Prognosis</div><div class="doc-field-val" id="smn-prog"></div></div>
             <div><div class="doc-field-lbl">Duration of Usage</div><div class="doc-field-val">☑ 12 Months to long term</div></div>
           </div>
@@ -1161,6 +1179,8 @@ body {
 
           <div class="doc-sec">Sample EHR Note — Moore Balance Brace</div>
 
+          <div style="font-size:12px;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--grey-light)" id="ehr-meta"><!-- generated --></div>
+
           <div style="font-size:12px;font-weight:700;margin-bottom:6px">Chief Complaint:</div>
           <div style="font-size:12px;line-height:1.8;margin-bottom:10px" id="ehr-cc"><!-- generated --></div>
 
@@ -1204,6 +1224,19 @@ body {
   </div>
 
 </div><!-- end container -->
+
+<!-- READINESS SIDEBAR (never prints) -->
+<button class="ready-fab no-print" id="ready-fab" onclick="toggleReadyPanel()" aria-label="Open packet readiness checklist">
+  ☑ Checklist <span class="cnt" id="ready-cnt">–</span>
+</button>
+<div class="ready-panel no-print" id="ready-panel" role="complementary" aria-label="Packet readiness">
+  <div class="ready-panel-head">
+    <div class="readiness-title" style="margin:0">Packet Readiness</div>
+    <button class="ready-close" onclick="toggleReadyPanel()" aria-label="Close">✕</button>
+  </div>
+  <div id="ready-body"></div>
+  <div class="readiness-note">Boxes with a <strong>dashed amber border</strong> in the documents are physician attestations — click each one that applies before printing. Unattested boxes print as standard empty checkboxes. This checklist never prints.</div>
+</div>
 
 <!-- ============================================================
      JAVASCRIPT
@@ -1409,6 +1442,9 @@ function recalc() {
   document.getElementById('results-content').style.display = 'block';
   renderResults(total);
 }
+const _origRecalc = recalc;
+recalc = function() { _origRecalc(); updateReadiness(); };
+
 
 function setChip(id, state) {
   const el = document.getElementById(id);
@@ -1601,6 +1637,7 @@ function generateDocs() {
 
   // Field values
   const ptName   = v('pt-name')       || '________________________________';
+  const ptDob    = v('pt-dob')        || '________________';
   const ptMbi    = v('pt-mbi')        || '________________________________';
   const ptAddr   = v('pt-addr')       || '________________________________';
   const assessDt = v('assess-date')   || today();
@@ -1625,6 +1662,8 @@ function generateDocs() {
   document.getElementById('swo-prog').textContent  = '☑ ' + prog;
   document.getElementById('swo-brand').textContent = 'Moore Balance Brace (MBB) — Orthotica Labs';
   document.getElementById('swo-date').textContent  = assessDt;
+  document.getElementById('swo-dob').textContent    = ptDob;
+  document.getElementById('swo-mbi').textContent    = ptMbi;
   document.getElementById('swo-npi-line').textContent   = npi;
   document.getElementById('swo-pname-line').textContent = clinician;
 
@@ -1672,6 +1711,8 @@ function generateDocs() {
   document.getElementById('smn-pt').textContent  = ptName;
   document.getElementById('smn-mbi').textContent = ptMbi;
   document.getElementById('smn-prog').textContent = '☑ ' + prog;
+  document.getElementById('smn-dob').textContent  = ptDob;
+  document.getElementById('smn-date').textContent = assessDt;
   document.getElementById('smn-npi-line').textContent   = npi;
   document.getElementById('smn-pname-line').textContent = clinician;
   document.getElementById('smn-phone-line').textContent = phone;
@@ -1719,6 +1760,8 @@ function generateDocs() {
   // EHR Note (Dr. Moore format)
   // ==============================
   document.getElementById('ehr-pname-line').textContent = clinician;
+  document.getElementById('ehr-meta').innerHTML =
+    `<strong>Patient:</strong> ${ptName} &nbsp;·&nbsp; <strong>DOB:</strong> ${ptDob} &nbsp;·&nbsp; <strong>Date of Service:</strong> ${assessDt}`;
 
   // Chief complaint
   const ccLines = [`Mr./Ms. <strong>${ptName}</strong> presents today with difficulty while walking and remaining steady and balanced on their feet.`];
@@ -1831,11 +1874,12 @@ function generateDocs() {
   document.getElementById('ehr-objectives').innerHTML =
     ehrObjs.map(([chk, o, att]) => `<div class="cbox-row" style="margin-bottom:5px">${cbox(!!chk, att)}<span style="font-size:12px">${o}</span></div>`).join('');
 
-  // Show docs + readiness panel
+  // Show docs; refresh + open the readiness sidebar
   document.getElementById('doc-wrap').style.display = 'block';
   updateReadiness();
+  document.getElementById('ready-panel').classList.add('open');
   document.getElementById('chip-4').classList.add('active');
-  document.getElementById('readiness').scrollIntoView({ behavior:'smooth', block:'start' });
+  document.getElementById('doc-wrap').scrollIntoView({ behavior:'smooth', block:'start' });
 }
 
 
@@ -1843,8 +1887,8 @@ function generateDocs() {
    READINESS PANEL + PACKET PRINT
    ============================================================ */
 function updateReadiness() {
-  const panel = document.getElementById('readiness');
-  if (!panel || document.getElementById('doc-wrap').style.display === 'none') return;
+  const body = document.getElementById('ready-body');
+  if (!body) return;
 
   const answered = Object.keys(S.scores).length;
   const reqFields = [['pt-name','Patient name'],['pt-dob','Date of birth'],['pt-mbi','Medicare ID (MBI)'],
@@ -1852,20 +1896,36 @@ function updateReadiness() {
   const missing = reqFields.filter(([id]) => !v(id)).map(([,lbl]) => lbl);
   const amb = document.getElementById('pt-ambulatory')?.checked;
   const latSel = getLaterality();
-  const customDone = document.querySelectorAll('#smn-custom .cbox.checked').length;
-  const pending = document.querySelectorAll('#doc-wrap .cbox.attest:not(.checked)').length;
+  const dw = document.getElementById('doc-wrap');
+  const docsUp = getComputedStyle(dw).display !== 'none';
 
   const row = (ok, txt) => `<div class="ready-row ${ok ? 'ready-ok' : 'ready-warn'}"><span class="ri">${ok ? '✓' : '⚠'}</span><span>${txt}</span></div>`;
-  panel.innerHTML =
-    `<div class="readiness-title">Packet Readiness — review before printing</div>` +
-    row(answered === 10, `LE-FRAT items answered: ${answered} of 10`) +
-    row(missing.length === 0, missing.length === 0 ? 'All required fields completed' : 'Missing required fields: ' + missing.join(', ')) +
-    row(!!amb, amb ? 'Ambulatory status attested (Section 2)' : 'Ambulatory status NOT attested — SMN criterion will print unchecked') +
-    row(!!latSel, latSel ? 'Laterality selected: ' + latSel : 'Laterality not selected — laterality-specific ICD-10 codes omitted') +
-    row(customDone > 0, `Custom-AFO necessity criteria attested: ${customDone} of 5` + (customDone === 0 ? ' — a custom-molded AFO claim needs at least one' : '')) +
-    row(pending === 0, pending === 0 ? 'No physician attestations pending' : `${pending} physician attestation box${pending === 1 ? '' : 'es'} pending in the documents below`) +
-    `<div class="readiness-note">Boxes with a <strong>dashed amber border</strong> in the documents are physician attestations — click each one that applies before printing. Unattested boxes print as standard empty checkboxes. This readiness panel never prints.</div>`;
-  panel.style.display = 'block';
+  let html = '', warns = 0;
+  const add = (ok, txt) => { html += row(ok, txt); if (!ok) warns++; };
+
+  add(answered === 10, `LE-FRAT items answered: ${answered} of 10`);
+  add(missing.length === 0, missing.length === 0 ? 'All required fields completed' : 'Missing required fields: ' + missing.join(', '));
+  add(!!amb, amb ? 'Ambulatory status attested (Section 2)' : 'Ambulatory status not attested — SMN criterion prints unchecked');
+  add(!!latSel, latSel ? 'Laterality selected: ' + latSel : 'Laterality not selected — laterality-specific ICD-10 codes omitted');
+
+  if (docsUp) {
+    const customDone = document.querySelectorAll('#smn-custom .cbox.checked').length;
+    const pending = document.querySelectorAll('#doc-wrap .cbox.attest:not(.checked)').length;
+    add(customDone > 0, `Custom-AFO necessity criteria attested: ${customDone} of 5` + (customDone === 0 ? ' — a custom-molded AFO claim needs at least one' : ''));
+    add(pending === 0, pending === 0 ? 'No physician attestations pending' : `${pending} physician attestation box${pending === 1 ? '' : 'es'} pending in the documents`);
+  } else {
+    html += `<div class="ready-row"><span class="ri" style="color:var(--grey)">…</span><span style="color:var(--grey)">Generate the compliance documents to review physician attestations</span></div>`;
+  }
+  body.innerHTML = html;
+
+  const fab = document.getElementById('ready-fab');
+  const cnt = document.getElementById('ready-cnt');
+  cnt.textContent = warns === 0 && docsUp ? 'Ready' : warns + ' to go';
+  fab.classList.toggle('all-clear', warns === 0 && docsUp);
+}
+
+function toggleReadyPanel() {
+  document.getElementById('ready-panel').classList.toggle('open');
 }
 
 function printPacket() {
@@ -1915,7 +1975,7 @@ function clearAll() {
   document.getElementById('results-pending').style.display = 'block';
   document.getElementById('results-content').style.display = 'none';
   document.getElementById('doc-wrap').style.display = 'none';
-  document.getElementById('readiness').style.display = 'none';
+  updateReadiness();
   setRiskTag('','Not assessed');
   ['chip-1','chip-2','chip-3','chip-4'].forEach(id => {
     const el = document.getElementById(id);
@@ -1935,6 +1995,11 @@ document.querySelectorAll('img.ortho-logo').forEach(i => i.src = ORTHO_LOGO);
 document.querySelectorAll('img.ortho-logo-inv').forEach(i => i.src = ORTHO_LOGO_INV);
 ['g-slow','g-balance','g-ataxia','g-stride','g-arm','g-wall','g-shuffle','g-enbloc','g-device']
   .forEach(id => document.getElementById(id)?.addEventListener('change', gaitChange));
+['pt-name','pt-dob','pt-mbi','practice-name','clinician','npi']
+  .forEach(id => document.getElementById(id)?.addEventListener('input', updateReadiness));
+document.getElementById('pt-ambulatory')?.addEventListener('change', updateReadiness);
+document.querySelectorAll('input[name="laterality"]').forEach(r => r.addEventListener('change', updateReadiness));
+updateReadiness();
 buildMmtTable();
 document.getElementById('assess-date').value = today();
 </script>
