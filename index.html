@@ -519,9 +519,6 @@ body {
    PRINT
    ============================================================ */
 
-/* Physician-attestation checkboxes: visibly pending on screen, normal in print */
-.cbox.attest:not(.checked) { border: 1.5px dashed #E6A23C; background: #FFF9EE; }
-.cbox.attest:not(.checked):hover { border-color: #C87F1B; }
 
 /* Readiness sidebar */
 .ready-fab {
@@ -558,7 +555,6 @@ body {
   .doc-wrap { display: block !important; }
   .comp-doc { border: none !important; padding: 0 !important; }
   .compliance-actions, .bottom-row { display: none !important; }
-  .cbox.attest { border: 1.5px solid var(--grey) !important; background: white !important; }
   body.print-packet-only .app-header, body.print-packet-only #section-patient,
   body.print-packet-only #section-frat, body.print-packet-only #section-results { display: none !important; }
   body.print-packet-only #section-compliance { border: none !important; box-shadow: none !important; }
@@ -1235,7 +1231,7 @@ body {
     <button class="ready-close" onclick="toggleReadyPanel()" aria-label="Close">✕</button>
   </div>
   <div id="ready-body"></div>
-  <div class="readiness-note">Boxes with a <strong>dashed amber border</strong> in the documents are physician attestations — click the ones that apply before printing. Leaving a box unchecked is correct when it does not apply; it prints as a standard empty checkbox. This checklist never prints.</div>
+  <div class="readiness-note">Every checkbox in the generated documents is clickable — check the ones that apply before printing. Leaving a box unchecked is correct when it does not apply. This checklist never prints.</div>
 </div>
 
 <!-- ============================================================
@@ -1535,7 +1531,7 @@ function getGaitDeviations() {
 
 
 function cbox(checked, attest) {
-  return `<div class="cbox${checked ? ' checked' : ''}${attest ? ' attest' : ''}" onclick="toggleCbox(this)" role="checkbox" aria-checked="${!!checked}" title="${attest ? 'Physician attestation — click to check' : 'Click to check or uncheck'}">${checked ? '✓' : ''}</div>`;
+  return `<div class="cbox${checked ? ' checked' : ''}${attest ? ' attest' : ''}" onclick="toggleCbox(this)" role="checkbox" aria-checked="${!!checked}" title="Click to check or uncheck">${checked ? '✓' : ''}</div>`;
 }
 
 /* Every generated checkbox is clickable — the clinician can check or
@@ -1775,7 +1771,7 @@ function generateDocs() {
   let gaitHtml = '<div style="font-size:11px;font-weight:700;color:var(--grey);margin-bottom:5px">Check All That Apply:</div>';
   const allGait = [
     ['g-slow','Slow tentative pace'],['g-balance','Loss of balance'],['g-ataxia','Ataxia (uncoordinated gait)'],
-    ['g-stride','4. Short strides'],['g-arm','Little or no arm swing'],['g-wall','Steadying self on walls'],
+    ['g-stride','Short strides'],['g-arm','Little or no arm swing'],['g-wall','Steadying self on walls'],
     ['g-shuffle','Shuffling'],['g-enbloc','En bloc turning'],['g-device','Not using assistive device properly']
   ];
   gaitHtml += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px 10px">';
