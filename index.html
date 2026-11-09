@@ -1868,6 +1868,18 @@ function generateDocs() {
   document.getElementById('ehr-objectives').innerHTML =
     ehrObjs.map(([chk, o, att]) => `<div class="cbox-row" style="margin-bottom:5px">${cbox(!!chk, att)}<span style="font-size:12px">${o}</span></div>`).join('');
 
+  if (DEMO_MODE) {
+    const tick = (sel, idxs) => {
+      const boxes = document.querySelectorAll(sel + ' .cbox');
+      idxs.forEach(i => { if (boxes[i] && !boxes[i].classList.contains('checked')) toggleCbox(boxes[i]); });
+    };
+    tick('#smn-criteria', [2, 3]);
+    tick('#smn-goals', [0, 1]);
+    tick('#smn-custom', [0, 1, 2]);
+    tick('#swo-objectives', [0, 1]);
+    tick('#ehr-objectives', [0, 1]);
+  }
+
   solidifyBlanks();
   // Saved-PDF filename comes from the page title
   const lastName = (ptName.split(',')[0] || 'Patient').trim().replace(/[^A-Za-z0-9-]/g, '') || 'Patient';
@@ -1988,7 +2000,8 @@ function fillDemo() {
   const lat = document.querySelector('input[name="laterality"][value="bilateral"]'); if (lat) lat.checked = true;
   updateReadiness();
 }
-if (new URLSearchParams(location.search).get('demo') === '1') setTimeout(fillDemo, 150);
+const DEMO_MODE = new URLSearchParams(location.search).get('demo') === '1';
+if (DEMO_MODE) setTimeout(fillDemo, 150);
 
 /* Warn before leaving a page with work in progress (nothing is ever saved) */
 const PAGE_TITLE = document.title;
